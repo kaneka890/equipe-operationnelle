@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react'; // useState/useEffect : useMissions
 import { supabase } from '../supabase.js';
 import { libelleType, periode, fcfa } from '../libelles.js';
-import {
-  Marque, IcoLieu, IcoCalendrier, IcoHorloge, IcoGens, IcoFleche, ICONE_ACTIVITE,
-} from '../Icones.jsx';
+import { Marque } from '../Icones.jsx';
 
 export function Topbar({ chemin }) {
   const courant = (c) => (chemin === c ? 'page' : undefined);
@@ -49,30 +47,28 @@ export function useMissions() {
   return etat;
 }
 
+// Une mission présentée comme un avis de recrutement : rubriques en tableau, sans décor.
 export function CarteMission({ m }) {
-  const Ico = ICONE_ACTIVITE[m.type] || ICONE_ACTIVITE.autre;
   const restantes = m.places_restantes;
+  const ref = String(m.id || '').replace(/-/g, '').slice(0, 6).toUpperCase();
   return (
-    <article className="mission">
-      <div className="mission-top">
-        <span className="tag tag-amber"><Ico taille={14} />{libelleType(m.type)}</span>
-        <span className={`tag ${restantes <= 2 ? 'tag-danger' : 'tag-em'}`}>
-          <span className="dot" />{restantes} {restantes > 1 ? 'places' : 'place'}
-        </span>
+    <article className="offre">
+      <div className="offre-tete">
+        <div>
+          <p className="offre-meta">{libelleType(m.type)}<span aria-hidden="true">·</span>Réf. {ref}</p>
+          <h3>{m.titre}</h3>
+          <p className="offre-partenaire">{m.partenaire ? `Pour le compte de ${m.partenaire}` : 'Partenaire communiqué à l’entretien'}</p>
+          {m.description && <p className="offre-desc">{m.description}</p>}
+        </div>
+        <a className="btn btn-primary offre-btn" href={`#/postuler?mission=${m.id}`}>Postuler à cette mission</a>
       </div>
-      <div>
-        <h3>{m.titre}</h3>
-        <p className="partenaire">{m.partenaire ? `Pour ${m.partenaire}` : 'Partenaire communiqué à l’entretien'}</p>
-      </div>
-      <dl>
-        <div><dt>Lieu</dt><IcoLieu taille={18} /><dd>{m.lieu}{m.ville ? `, ${m.ville}` : ''}</dd></div>
-        <div><dt>Dates</dt><IcoCalendrier taille={18} /><dd>{periode(m.date_debut, m.date_fin)}</dd></div>
-        {m.horaires && <div><dt>Horaires</dt><IcoHorloge taille={18} /><dd>{m.horaires}</dd></div>}
+      <dl className="offre-rubriques">
+        <div><dt>Lieu</dt><dd>{m.lieu}{m.ville ? `, ${m.ville}` : ''}</dd></div>
+        <div><dt>Période</dt><dd>{periode(m.date_debut, m.date_fin)}</dd></div>
+        <div><dt>Horaires</dt><dd>{m.horaires || 'Précisés à l’entretien'}</dd></div>
+        <div><dt>Rémunération</dt><dd className="tnum">{m.tarif_jour != null ? `${fcfa(m.tarif_jour)} par jour` : 'Précisée à l’entretien'}</dd></div>
+        <div><dt>Postes à pourvoir</dt><dd className="tnum">{restantes}</dd></div>
       </dl>
-      <div className="mission-foot">
-        <div className="tarif tnum">{m.tarif_jour != null ? fcfa(m.tarif_jour) : 'Rémunération'}<small>{m.tarif_jour != null ? 'par jour' : 'précisée à l’entretien'}</small></div>
-        <a className="btn btn-primary" href={`#/postuler?mission=${m.id}`}>Postuler <IcoFleche taille={18} /></a>
-      </div>
     </article>
   );
 }
@@ -80,9 +76,8 @@ export function CarteMission({ m }) {
 export function SansMission() {
   return (
     <div className="vide">
-      <span className="succes-ico" style={{ background: 'var(--em-50)', color: 'var(--em-700)' }}><IcoGens taille={26} /></span>
       <h3>Aucune mission ouverte pour le moment</h3>
-      <p>Déposez votre candidature quand même : nous vous appelons dès qu’une mission correspond à votre profil et à vos disponibilités.</p>
+      <p>Les candidatures restent recevables : les profils sont contactés dès qu’une mission correspond à leurs activités et disponibilités.</p>
       <a className="btn btn-primary" href="#/postuler">Déposer ma candidature</a>
     </div>
   );

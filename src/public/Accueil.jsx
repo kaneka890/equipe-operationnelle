@@ -71,9 +71,9 @@ export default function Accueil() {
             <a className="btn btn-ghost" href="#/missions">Toutes les missions <IcoFleche taille={18} /></a>
           </div>
           {chargement ? (
-            <div className="missions-grid">{[0, 1, 2].map((i) => <div className="squelette" key={i} />)}</div>
+            <div className="offres"><div className="squelette squelette-offre" /></div>
           ) : apercu.length ? (
-            <div className="missions-grid">{apercu.map((m) => <CarteMission key={m.id} m={m} />)}</div>
+            <div className="offres">{apercu.map((m) => <CarteMission key={m.id} m={m} />)}</div>
           ) : (
             <SansMission />
           )}

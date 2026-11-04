@@ -523,4 +523,42 @@ p { margin: 0; }
 .code-box strong { font-size: clamp(24px, 5vw, 30px); letter-spacing: .12em; color: var(--ink); }
 .form-card h2 { font-size: 21px; }
 
+/* ----- Avis de mission ----- */
+.offres { display: flex; flex-direction: column; gap: 16px; }
+.offre { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); }
+.offre-tete { padding: 22px 28px 18px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+.offre-btn { flex: none; }
+@media (max-width: 720px) { .offre-tete { flex-direction: column; gap: 16px; } .offre-btn { width: 100%; } }
+.offre-meta { display: flex; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+.offre h3 { font-size: 19px; font-weight: 600; line-height: 1.35; }
+.offre-partenaire { font-size: 14.5px; color: var(--ink-2); margin-top: 4px; }
+.offre-desc { font-size: 14.5px; color: var(--ink-3); margin-top: 10px; max-width: 760px; white-space: pre-line; }
+.offre-rubriques { margin: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.offre-rubriques div { padding: 16px 28px; border-right: 1px solid var(--line); }
+.offre-rubriques div:last-child { border-right: 0; }
+.offre-rubriques dt { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+.offre-rubriques dd { margin: 0; font-size: 14.5px; color: var(--ink); font-weight: 500; }
+@media (max-width: 900px) {
+  .offre-rubriques { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .offre-rubriques div { border-right: 0; border-bottom: 1px solid var(--line); }
+  .offre-rubriques div:nth-child(odd) { border-right: 1px solid var(--line); }
+  .offre-rubriques div:last-child { grid-column: 1 / -1; border-right: 0; border-bottom: 0; }
+}
+@media (max-width: 560px) {
+  .offre-tete, .offre-rubriques div { padding-left: 20px; padding-right: 20px; }
+  .offre-rubriques { grid-template-columns: minmax(0, 1fr); }
+  .offre-rubriques div, .offre-rubriques div:nth-child(odd) { border-right: 0; }
+}
+.squelette-offre { min-height: 190px; }
+
+/* Filtres en onglets soulignés */
+.onglets { display: flex; gap: 4px; border-bottom: 1px solid var(--line-2); margin-bottom: 24px; overflow-x: auto; scrollbar-width: none; }
+.onglets::-webkit-scrollbar { display: none; }
+.onglet { flex: none; background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 12px 14px; font-size: 14.5px; font-weight: 500; color: var(--ink-3); cursor: pointer; }
+.onglet span { font-size: 12.5px; color: var(--ink-3); margin-left: 4px; }
+.onglet:hover { color: var(--ink); }
+.onglet[aria-pressed='true'] { color: var(--ink); font-weight: 600; border-bottom-color: var(--em-700); }
+
+.vide { text-align: left; align-items: flex-start; padding: 28px; }
+
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
