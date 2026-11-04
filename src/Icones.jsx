@@ -37,8 +37,9 @@ export const IcoEtoile = I(<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-
 
 export function Marque({ clair }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 32 32" aria-hidden="true">
-      <path d="M10 7v18M10 16l10-9M13.5 13l7.5 12" stroke={clair ? '#0B3B2E' : '#F2B544'} strokeWidth="3.4" fill="none" strokeLinecap="round" />
+    <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="16" cy="16" r="10" stroke={clair ? '#0B3B2E' : '#F2B544'} strokeWidth="3.4" fill="none" strokeDasharray="48 15" strokeLinecap="round" transform="rotate(-50 16 16)" />
+      <circle cx="16" cy="16" r="3.6" fill={clair ? '#0B3B2E' : '#F2B544'} />
     </svg>
   );
 }

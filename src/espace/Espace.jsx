@@ -37,7 +37,7 @@ export default function Espace({ chemin }) {
           <h1 style={{ fontSize: 26 }}>Accès réservé aux recruteurs</h1>
           <p style={{ color: 'var(--ink-3)' }}>
             Ce compte n’a pas accès au recrutement. Seuls l’administrateur, les superviseurs et la direction
-            de Kaba-Kaba y entrent.
+            de l’Équipe opérationnelle y entrent.
           </p>
           <button className="btn btn-ghost" onClick={() => supabase.auth.signOut()}>Se déconnecter</button>
         </div>
@@ -53,7 +53,7 @@ export default function Espace({ chemin }) {
       <aside className="side">
         <a className="brand" href="#/espace" style={{ color: '#fff' }}>
           <span className="brand-mark" style={{ background: '#fff' }}><Marque clair /></span>
-          <span>Kaba-Kaba<small>Recrutement</small></span>
+          <span>Équipe opérationnelle<small>Recrutement</small></span>
         </a>
         <nav aria-label="Espace recruteur">
           <a href="#/espace" aria-current={page === 'candidatures' ? 'page' : undefined}><IcoTableau />Candidatures</a>
@@ -96,7 +96,7 @@ function Connexion() {
       <div className="login-art">
         <a className="brand" href="#/" style={{ color: '#fff' }}>
           <span className="brand-mark" style={{ background: '#fff' }}><Marque clair /></span>
-          <span>Kaba-Kaba<small>Recrutement</small></span>
+          <span>Équipe opérationnelle<small>Recrutement</small></span>
         </a>
         <div>
           <span className="eyebrow">Espace recruteur</span>

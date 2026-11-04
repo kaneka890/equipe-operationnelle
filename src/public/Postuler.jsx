@@ -322,7 +322,7 @@ export default function Postuler({ missionId }) {
 
               <label className="check">
                 <input type="checkbox" checked={f.consentement} onChange={(e) => maj('consentement', e.target.checked)} />
-                <span>J’accepte que mes informations servent uniquement au recrutement pour les missions de Kaba-Kaba et de ses partenaires. Seuls les recruteurs Kaba-Kaba y ont accès.</span>
+                <span>J’accepte que mes informations servent uniquement au recrutement pour les missions de l’Équipe opérationnelle et de ses partenaires. Seuls ses recruteurs y ont accès.</span>
               </label>
             </>
           )}
@@ -349,7 +349,7 @@ function Confirmation({ code, nom, telephone, photo }) {
   const [copie, setCopie] = useState(false);
   const prenom = nom.trim().split(/\s+/).slice(-1)[0];
   const lienSuivi = `${window.location.origin}${window.location.pathname}#/suivi?code=${code}`;
-  const texte = `Ma candidature Kaba-Kaba Talents : code ${code}. Suivi : ${lienSuivi}`;
+  const texte = `Ma candidature Équipe opérationnelle : code ${code}. Suivi : ${lienSuivi}`;
 
   async function copier() {
     try { await navigator.clipboard.writeText(code); setCopie(true); setTimeout(() => setCopie(false), 2000); } catch { /* rien */ }

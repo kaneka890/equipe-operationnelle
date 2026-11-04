@@ -14,7 +14,7 @@ export default function Accueil() {
             <span className="eyebrow">Recrutement ouvert</span>
             <h1>Le terrain, c’est <em>votre</em> scène.</h1>
             <p className="lead">
-              Kaba-Kaba recrute des promotrices et promoteurs pour les marques de ses partenaires :
+              L’Équipe opérationnelle recrute des promotrices et promoteurs pour les marques de ses partenaires :
               supermarchés, marchés, animations, dégustations. Des missions rémunérées, près de chez vous,
               aux jours qui vous conviennent.
             </p>
@@ -32,7 +32,7 @@ export default function Accueil() {
           <div className="badge-stack" aria-hidden="true">
             <div className="pass pass-2">
               <div className="pass-top">
-                <span className="pass-photo">KK</span>
+                <span className="pass-photo">ÉO</span>
                 <span className="tag" style={{ background: 'rgba(7,42,32,.12)', color: '#072A20' }}>Open market</span>
               </div>
               <h3>Badge de mission</h3>
@@ -124,7 +124,7 @@ export default function Accueil() {
         <div className="container">
           <div className="activites" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', marginBottom: 56 }}>
             <div className="activite"><span className="ico"><IcoArgent taille={24} /></span><h3>Rémunéré à la journée</h3><p>Le tarif de chaque mission est affiché avant que vous postuliez.</p></div>
-            <div className="activite"><span className="ico"><IcoBadge taille={24} /></span><h3>Encadré sur le terrain</h3><p>Un superviseur Kaba-Kaba vous accompagne pendant chaque mission.</p></div>
+            <div className="activite"><span className="ico"><IcoBadge taille={24} /></span><h3>Encadré sur le terrain</h3><p>Un superviseur de l’équipe vous accompagne pendant chaque mission.</p></div>
             <div className="activite"><span className="ico"><IcoBouclier taille={24} /></span><h3>Vos données protégées</h3><p>Elles servent uniquement au recrutement. Seuls nos recruteurs les voient.</p></div>
           </div>
           <div className="bandeau">

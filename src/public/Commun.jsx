@@ -23,9 +23,9 @@ export function Topbar({ sombre, chemin }) {
   return (
     <header className={`topbar${sombre ? ' on-dark' : ''}${scrolle ? ' scrolled' : ''}`}>
       <div className="container topbar-in">
-        <a className="brand" href="#/" aria-label="Kaba-Kaba Talents, accueil">
+        <a className="brand" href="#/" aria-label="Équipe opérationnelle, accueil">
           <span className="brand-mark"><Marque clair={sombre} /></span>
-          <span>Kaba-Kaba<small>Talents terrain</small></span>
+          <span>Équipe opérationnelle<small>Talents terrain</small></span>
         </a>
         <nav className="nav" aria-label="Navigation">
           <a className="lien" href="#/missions" aria-current={courant('/missions')}>Missions</a>
@@ -41,7 +41,7 @@ export function Footer() {
   return (
     <footer className="footer">
       <div className="container footer-in">
-        <span>© {new Date().getFullYear()} Kaba-Kaba · Recrutement des promotrices et promoteurs terrain</span>
+        <span>© {new Date().getFullYear()} Équipe opérationnelle · Recrutement des promotrices et promoteurs terrain</span>
         <span style={{ display: 'flex', gap: 18 }}>
           <a href="#/suivi">Suivre ma candidature</a>
           <a href="#/espace">Espace recruteur</a>

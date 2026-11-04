@@ -1,5 +1,5 @@
 /* =====================================================================
-   Kaba-Kaba Talents — système visuel
+   Équipe opérationnelle — système visuel
    Émeraude profond pour l'action, ambre pour la marque, encre neutre.
    ===================================================================== */
 :root {
@@ -191,6 +191,7 @@ p { margin: 0; }
 .topbar-in { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 72px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: -0.02em; }
 .brand:hover { color: inherit; }
+@media (max-width: 420px) { .brand { font-size: 16px; } .brand small { font-size: 10px; } }
 .brand-mark { width: 34px; height: 34px; border-radius: 10px; background: var(--em-900); display: flex; align-items: center; justify-content: center; }
 .on-dark .brand-mark { background: #fff; }
 .brand small { font-family: var(--body); font-weight: 600; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .7; display: block; margin-top: -2px; }

@@ -2,7 +2,7 @@
   "name": "recrutement-web",
   "private": true,
   "version": "1.0.0",
-  "description": "Kaba-Kaba Talents : recrutement des promotrices et promoteurs terrain",
+  "description": "Équipe opérationnelle : recrutement des promotrices et promoteurs terrain",
   "type": "module",
   "scripts": {
     "dev": "vite --port 5190 --host",

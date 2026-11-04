@@ -143,7 +143,7 @@ export default function Fiche({ c, photo, peutAgir, moi, onFermer, onChange }) {
                   <input className="input" type="datetime-local" value={entretien.le} onChange={(e) => setEntretien({ ...entretien, le: e.target.value })} />
                 </label>
                 <label className="field"><span>Lieu</span>
-                  <input className="input" value={entretien.lieu} onChange={(e) => setEntretien({ ...entretien, lieu: e.target.value })} placeholder="Ex. : Bureau Kaba-Kaba" />
+                  <input className="input" value={entretien.lieu} onChange={(e) => setEntretien({ ...entretien, lieu: e.target.value })} placeholder="Ex. : Bureau de l’équipe" />
                 </label>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
