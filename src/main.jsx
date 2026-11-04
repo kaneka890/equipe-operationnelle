@@ -22,7 +22,7 @@ function App() {
 
   return (
     <>
-      <Topbar sombre={path === '/'} chemin={path} />
+      <Topbar chemin={path} />
       <main>{page}</main>
       <Footer />
     </>

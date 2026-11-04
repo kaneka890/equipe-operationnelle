@@ -1,36 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'; // useState/useEffect : useMissions
 import { supabase } from '../supabase.js';
 import { libelleType, periode, fcfa } from '../libelles.js';
 import {
   Marque, IcoLieu, IcoCalendrier, IcoHorloge, IcoGens, IcoFleche, ICONE_ACTIVITE,
 } from '../Icones.jsx';
 
-export function Topbar({ sombre, chemin }) {
-  const [scrolle, setScrolle] = useState(false);
-  const [horsHero, setHorsHero] = useState(false);
-  useEffect(() => {
-    const f = () => {
-      setScrolle(window.scrollY > 8);
-      const hero = document.querySelector('.hero');
-      setHorsHero(!hero || window.scrollY > hero.offsetHeight - 80);
-    };
-    f();
-    window.addEventListener('scroll', f, { passive: true });
-    return () => window.removeEventListener('scroll', f);
-  }, []);
+export function Topbar({ chemin }) {
   const courant = (c) => (chemin === c ? 'page' : undefined);
-  sombre = sombre && !horsHero;
   return (
-    <header className={`topbar${sombre ? ' on-dark' : ''}${scrolle ? ' scrolled' : ''}`}>
+    <header className="topbar">
       <div className="container topbar-in">
         <a className="brand" href="#/" aria-label="Équipe opérationnelle Octoplus CI, accueil">
-          <span className="brand-mark"><Marque clair={sombre} /></span>
+          <span className="brand-mark"><Marque /></span>
           <span>Octoplus CI<small>Équipe opérationnelle</small></span>
         </a>
         <nav className="nav" aria-label="Navigation">
           <a className="lien" href="#/missions" aria-current={courant('/missions')}>Missions</a>
           <a className="lien" href="#/suivi" aria-current={courant('/suivi')}>Suivre ma candidature</a>
-          <a className={`btn btn-sm ${sombre ? 'btn-amber' : 'btn-primary'}`} href="#/postuler">Postuler</a>
+          <a className="btn btn-sm btn-primary" href="#/postuler">Postuler</a>
         </nav>
       </div>
     </header>
