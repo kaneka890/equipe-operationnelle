@@ -1,0 +1,21 @@
+{
+  "name": "recrutement-web",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Kaba-Kaba Talents : recrutement des promotrices et promoteurs terrain",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5190 --host",
+    "build": "vite build",
+    "preview": "vite preview --port 5191"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.45.4",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "4.3.4",
+    "vite": "5.4.11"
+  }
+}
