@@ -4,7 +4,7 @@ import {
   ETAPES, CRITERES, JOURS, CRENEAUX, EXPERIENCES, STATUTS_AFFECTATION, libelleType, libelleEtape,
   etapeSuivante, initiales, telAffiche, dateHeure, court, jourAn, periode,
 } from '../libelles.js';
-import { IcoX, IcoAlerte, IcoWhatsapp, IcoCalendrier } from '../Icones.jsx';
+import { IcoX, IcoAlerte } from '../Icones.jsx';
 
 const ACTIONS = { etape: 'Étape', entretien: 'Entretien fixé', affectation: 'Mission', remarque: 'Remarque' };
 
@@ -66,129 +66,163 @@ export default function Fiche({ c, photo, peutAgir, moi, onFermer, onChange }) {
   const exp = EXPERIENCES.find((x) => x.k === c.experience)?.l;
   const lienWa = `https://wa.me/225${c.telephone}`;
 
+  const statutClasse = c.etape === 'refusee' ? 'statut statut-refusee' : `statut statut-${c.etape}`;
+  const statutTexte = c.etape === 'refusee' ? 'Non retenu(e)' : libelleEtape(c.etape);
+
   return (
     <>
       <div className="voile" onClick={onFermer} />
-      <aside className="panneau" role="dialog" aria-modal="true" aria-label={`Fiche de ${c.nom}`}>
-        <div className="panneau-head">
-          {photo
-            ? <a href={photo} target="_blank" rel="noreferrer" className="av" style={{ width: 84, height: 84 }} title="Voir la photo en grand"><img src={photo} alt={`Photo de ${c.nom}`} /></a>
-            : <span className="av">{initiales(c.nom)}</span>}
-          <div style={{ minWidth: 0 }}>
-            <h2>{c.nom}</h2>
-            <p>{c.quartier}, {c.ville} · {c.age} ans · dossier {c.code_suivi}</p>
-            <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
-              <span className={`tag ${c.etape === 'refusee' ? 'tag-danger' : 'tag-em'}`}><span className="dot" />{libelleEtape(c.etape)}</span>
-              {c.suivi_par === moi.id && <span className="tag">Suivi par vous</span>}
-              {c.suivi_par && c.suivi_par !== moi.id && c.suivi_par_nom && <span className="tag">Suivi par {c.suivi_par_nom}</span>}
+      <aside className="panneau dossier" role="dialog" aria-modal="true" aria-label={`Dossier de ${c.nom}`}>
+        <div className="dossier-tete">
+          <div className="dossier-ident">
+            {photo
+              ? <a href={photo} target="_blank" rel="noreferrer" className="dossier-photo" title="Voir la photo en grand"><img src={photo} alt={`Photo de ${c.nom}`} /></a>
+              : <span className="dossier-photo vide-photo">{initiales(c.nom)}</span>}
+            <div style={{ minWidth: 0 }}>
+              <p className="dossier-numero">Dossier n° <span className="tnum">{c.code_suivi}</span></p>
+              <h2>{c.nom}</h2>
+              <p className="dossier-sous">
+                <span className={statutClasse}>{statutTexte}</span>
+                <span>
+                  {c.suivi_par === moi.id ? 'Suivi par vous' : c.suivi_par_nom ? `Suivi par ${c.suivi_par_nom}` : 'Non attribué'}
+                </span>
+              </p>
             </div>
           </div>
-          <button className="btn btn-ghost btn-icon fermer" aria-label="Fermer la fiche" onClick={onFermer}><IcoX /></button>
+          <button className="btn btn-ghost btn-icon" aria-label="Fermer le dossier" onClick={onFermer}><IcoX /></button>
         </div>
 
-        <div className="panneau-body">
+        <div className="panneau-body dossier-corps">
           {erreur && <div className="alert alert-danger" role="alert"><IcoAlerte />{erreur}</div>}
 
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <a className="btn btn-ghost btn-sm" href={`tel:+225${c.telephone}`}>Appeler {telAffiche(c.telephone)}</a>
-            <a className="btn btn-ghost btn-sm" href={lienWa} target="_blank" rel="noreferrer"><IcoWhatsapp taille={16} />WhatsApp</a>
-          </div>
-
           {c.etape === 'entretien' && c.entretien_le && (
-            <div className="alert alert-amber"><IcoCalendrier />
-              <span>Entretien <strong>{dateHeure(c.entretien_le)}</strong> · {c.entretien_lieu}</span>
-            </div>
+            <p className="mention"><strong>Entretien convoqué</strong> le {dateHeure(c.entretien_le)}, {c.entretien_lieu}.</p>
           )}
 
-          <section className="bloc">
-            <h3>Profil</h3>
-            <dl className="infos">
-              <div><dt>Activités</dt><dd>{c.activites.map(libelleType).join(', ')}</dd></div>
-              <div><dt>Expérience</dt><dd>{exp}</dd></div>
-              <div><dt>Langues</dt><dd>{c.langues.join(', ') || '—'}</dd></div>
-              <div><dt>Né(e) le</dt><dd>{jourAn(c.date_naissance)}</dd></div>
-              <div><dt>Jours</dt><dd>{JOURS.filter((j) => c.jours.includes(j.k)).map((j) => j.l).join(', ')}</dd></div>
-              <div><dt>Moments</dt><dd>{CRENEAUX.filter((x) => c.creneaux.includes(x.k)).map((x) => x.l).join(', ')}</dd></div>
-              {c.mission_souhaitee && <div className="large"><dt>A postulé pour</dt><dd>{c.mission_souhaitee}</dd></div>}
-              {c.experience_detail && <div className="large"><dt>Ce qu’il ou elle a déjà fait</dt><dd style={{ whiteSpace: 'pre-line' }}>{c.experience_detail}</dd></div>}
-              <div className="large"><dt>Candidature reçue</dt><dd>{dateHeure(c.cree_le)}</dd></div>
+          <section className="rubrique">
+            <h3>1. Identité et coordonnées</h3>
+            <dl className="tableau-dossier">
+              <div><dt>Nom et prénoms</dt><dd>{c.nom}</dd></div>
+              <div><dt>Date de naissance</dt><dd>{jourAn(c.date_naissance)} ({c.age} ans)</dd></div>
+              <div><dt>Téléphone</dt><dd className="tnum">
+                {telAffiche(c.telephone)}
+                <span className="dossier-liens">
+                  <a href={`tel:+225${c.telephone}`}>Appeler</a>
+                  <a href={lienWa} target="_blank" rel="noreferrer">WhatsApp</a>
+                </span>
+              </dd></div>
+              <div><dt>Commune / quartier</dt><dd>{c.quartier}</dd></div>
+              <div><dt>Ville</dt><dd>{c.ville}</dd></div>
+              <div><dt>Dépôt du dossier</dt><dd>{dateHeure(c.cree_le)}</dd></div>
             </dl>
           </section>
 
-          <section className="bloc">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <h3 style={{ fontFamily: 'var(--body)', fontSize: 13, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>Grille d’entretien</h3>
-              <span className="moyenne">{moyenne ? <><strong className="tnum">{moyenne}</strong><span className="hint">/ 5</span></> : <span className="hint">Pas encore noté</span>}</span>
-            </div>
-            <div className="grille">
-              {CRITERES.map((cr) => (
-                <div className="critere" key={cr.k}>
-                  <span>{cr.l}</span>
-                  <span className="notes" role="group" aria-label={cr.l}>
+          <section className="rubrique">
+            <h3>2. Profil</h3>
+            <dl className="tableau-dossier">
+              <div><dt>Activités souhaitées</dt><dd>{c.activites.map(libelleType).join(', ')}</dd></div>
+              <div><dt>Mission demandée</dt><dd>{c.mission_souhaitee || 'Aucune en particulier'}</dd></div>
+              <div><dt>Expérience</dt><dd>{exp}</dd></div>
+              {c.experience_detail && <div><dt>Précisions</dt><dd style={{ whiteSpace: 'pre-line' }}>{c.experience_detail}</dd></div>}
+              <div><dt>Langues parlées</dt><dd>{c.langues.join(', ') || '—'}</dd></div>
+            </dl>
+          </section>
+
+          <section className="rubrique">
+            <h3>3. Disponibilités</h3>
+            <dl className="tableau-dossier">
+              <div><dt>Jours</dt><dd>{JOURS.filter((j) => c.jours.includes(j.k)).map((j) => j.l).join(', ') || '—'}</dd></div>
+              <div><dt>Moments de la journée</dt><dd>{CRENEAUX.filter((x) => c.creneaux.includes(x.k)).map((x) => x.l).join(', ') || '—'}</dd></div>
+            </dl>
+          </section>
+
+          <section className="rubrique">
+            <h3>4. Évaluation de l’entretien <span className="rubrique-note">{moyenne ? `Moyenne : ${moyenne} / 5` : 'Non évalué'}</span></h3>
+            <table className="grille-eval">
+              <thead><tr><th>Critère</th>{[1, 2, 3, 4, 5].map((n) => <th key={n} className="tnum">{n}</th>)}</tr></thead>
+              <tbody>
+                {CRITERES.map((cr) => (
+                  <tr key={cr.k}>
+                    <td>{cr.l}</td>
                     {[1, 2, 3, 4, 5].map((n) => (
-                      <button key={n} className={notes[cr.k] >= n ? 'on' : ''} aria-pressed={notes[cr.k] === n}
-                        aria-label={`${cr.l} : ${n} sur 5`} disabled={!peutAgir || occupe} onClick={() => noter(cr.k, n)}>{n}</button>
+                      <td key={n} className="case">
+                        <button className={notes[cr.k] === n ? 'coche' : ''} aria-pressed={notes[cr.k] === n}
+                          aria-label={`${cr.l} : ${n} sur 5`} disabled={!peutAgir || occupe} onClick={() => noter(cr.k, n)}>
+                          {notes[cr.k] === n ? '×' : ''}
+                        </button>
+                      </td>
                     ))}
-                  </span>
-                </div>
-              ))}
-            </div>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="hint">Échelle : 1 insuffisant · 2 passable · 3 correct · 4 bien · 5 très bien.</p>
           </section>
 
           {peutAgir && entretien && (
-            <section className="bloc">
-              <h3>Fixer l’entretien</h3>
+            <section className="rubrique rubrique-action">
+              <h3>Convocation à l’entretien</h3>
               <div className="grid-2">
-                <label className="field"><span>Date et heure</span>
+                <label className="field"><span>Date et heure <span className="requis">*</span></span>
                   <input className="input" type="datetime-local" value={entretien.le} onChange={(e) => setEntretien({ ...entretien, le: e.target.value })} />
                 </label>
-                <label className="field"><span>Lieu</span>
-                  <input className="input" value={entretien.lieu} onChange={(e) => setEntretien({ ...entretien, lieu: e.target.value })} placeholder="Ex. : Bureau de l’équipe" />
+                <label className="field"><span>Lieu <span className="requis">*</span></span>
+                  <input className="input" value={entretien.lieu} onChange={(e) => setEntretien({ ...entretien, lieu: e.target.value })} />
                 </label>
               </div>
+              <p className="hint">La date et le lieu apparaissent dans le suivi du candidat.</p>
               <div style={{ display: 'flex', gap: 8 }}>
                 <button className="btn btn-primary" disabled={occupe} onClick={async () => {
-                  if (!entretien.le) { setErreur('Choisissez la date et l’heure.'); return; }
+                  if (!entretien.le) { setErreur('Indiquez la date et l’heure de l’entretien.'); return; }
                   if (await agir('fixer_entretien', { p_candidat: c.id, p_le: new Date(entretien.le).toISOString(), p_lieu: entretien.lieu })) setEntretien(null);
-                }}>Enregistrer l’entretien</button>
+                }}>Enregistrer la convocation</button>
                 <button className="btn btn-ghost" onClick={() => setEntretien(null)}>Annuler</button>
               </div>
-              <p className="hint">Le candidat voit la date et le lieu en suivant son dossier.</p>
             </section>
           )}
 
           {peutAgir && refus !== null && (
-            <section className="bloc">
-              <h3>Refuser la candidature</h3>
-              <textarea className="textarea" value={refus} onChange={(e) => setRefus(e.target.value)} placeholder="Motif (gardé au journal, jamais montré au candidat)" />
+            <section className="rubrique rubrique-action">
+              <h3>Décision de non-retenue</h3>
+              <label className="field"><span>Motif <span className="requis">*</span></span>
+                <textarea className="textarea" value={refus} onChange={(e) => setRefus(e.target.value)} />
+              </label>
+              <p className="hint">Le motif est conservé à l’historique ; il n’est jamais communiqué au candidat.</p>
               <div style={{ display: 'flex', gap: 8 }}>
                 <button className="btn btn-danger" disabled={occupe} onClick={async () => {
                   if (await agir('changer_etape_candidat', { p_candidat: c.id, p_etape: 'refusee', p_motif: refus })) setRefus(null);
-                }}>Confirmer le refus</button>
+                }}>Confirmer la décision</button>
                 <button className="btn btn-ghost" onClick={() => setRefus(null)}>Annuler</button>
               </div>
             </section>
           )}
 
           {(c.etape === 'formation' || c.etape === 'validee' || affectations.length > 0) && (
-            <section className="bloc">
-              <h3>Missions</h3>
-              {affectations.map((a) => (
-                <div className="ligne-aff" key={a.id}>
-                  <span style={{ minWidth: 0 }}>
-                    <strong style={{ display: 'block' }}>{a.missions_terrain?.titre}</strong>
-                    <span className="hint">{a.missions_terrain?.lieu} · {periode(a.missions_terrain?.date_debut, a.missions_terrain?.date_fin)}</span>
-                  </span>
-                  <select className="select" value={a.statut} disabled={!peutAgir || occupe} aria-label="Statut de la mission"
-                    onChange={(e) => agir('changer_affectation', { p_affectation: a.id, p_statut: e.target.value })}>
-                    {STATUTS_AFFECTATION.map((s) => <option key={s.k} value={s.k}>{s.l}</option>)}
-                  </select>
-                </div>
-              ))}
+            <section className="rubrique">
+              <h3>5. Affectations</h3>
+              {affectations.length > 0 ? (
+                <table className="historique">
+                  <thead><tr><th>Mission</th><th>Période</th><th>Statut</th></tr></thead>
+                  <tbody>
+                    {affectations.map((a) => (
+                      <tr key={a.id}>
+                        <td><strong>{a.missions_terrain?.titre}</strong><small>{a.missions_terrain?.lieu}</small></td>
+                        <td>{periode(a.missions_terrain?.date_debut, a.missions_terrain?.date_fin)}</td>
+                        <td>
+                          <select className="select" value={a.statut} disabled={!peutAgir || occupe} aria-label="Statut de l’affectation"
+                            onChange={(e) => agir('changer_affectation', { p_affectation: a.id, p_statut: e.target.value })}>
+                            {STATUTS_AFFECTATION.map((s) => <option key={s.k} value={s.k}>{s.l}</option>)}
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : <p className="hint">Aucune affectation.</p>}
               {peutAgir && (c.etape === 'formation' || c.etape === 'validee') && (
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   <select className="select" style={{ flex: 1, minWidth: 220 }} value={missionChoisie} onChange={(e) => setMissionChoisie(e.target.value)} aria-label="Mission à affecter">
-                    <option value="">{missions.length ? 'Choisir une mission ouverte…' : 'Aucune mission ouverte'}</option>
+                    <option value="">{missions.length ? 'Sélectionner une mission ouverte' : 'Aucune mission ouverte'}</option>
                     {missions.map((m) => <option key={m.id} value={m.id}>{m.titre} · {m.lieu} · {periode(m.date_debut, m.date_fin)}</option>)}
                   </select>
                   <button className="btn btn-primary" disabled={!missionChoisie || occupe} onClick={async () => {
@@ -199,49 +233,57 @@ export default function Fiche({ c, photo, peutAgir, moi, onFermer, onChange }) {
             </section>
           )}
 
-          <section className="bloc">
-            <h3>Journal</h3>
+          <section className="rubrique">
+            <h3>{c.etape === 'formation' || c.etape === 'validee' || affectations.length > 0 ? '6' : '5'}. Historique du dossier</h3>
+            <table className="historique">
+              <thead><tr><th>Date</th><th>Opération</th><th>Agent</th></tr></thead>
+              <tbody>
+                {journal.map((j) => (
+                  <tr key={j.id}>
+                    <td className="tnum" style={{ whiteSpace: 'nowrap' }}>{court(j.le)}</td>
+                    <td>
+                      {ACTIONS[j.action] || j.action}
+                      {j.action === 'etape' && <> : {libelleEtape(j.de)} → {libelleEtape(j.vers)}</>}
+                      {j.action === 'affectation' && j.vers && <> : {STATUTS_AFFECTATION.find((s) => s.k === j.vers)?.l}</>}
+                      {j.texte && <small>{j.texte}</small>}
+                    </td>
+                    <td>{j.par === moi.id ? 'Vous' : j.par ? 'Recruteur' : '—'}</td>
+                  </tr>
+                ))}
+                <tr>
+                  <td className="tnum" style={{ whiteSpace: 'nowrap' }}>{court(c.cree_le)}</td>
+                  <td>Dépôt de la candidature en ligne</td>
+                  <td>Candidat(e)</td>
+                </tr>
+              </tbody>
+            </table>
             {peutAgir && (
               <div style={{ display: 'flex', gap: 8 }}>
-                <input className="input" value={remarque} onChange={(e) => setRemarque(e.target.value)} placeholder="Ajouter une remarque…" aria-label="Remarque" />
+                <input className="input" value={remarque} onChange={(e) => setRemarque(e.target.value)} placeholder="Observation à ajouter à l’historique" aria-label="Observation" />
                 <button className="btn btn-ghost" disabled={!remarque.trim() || occupe} onClick={async () => {
                   if (await agir('noter_remarque_candidat', { p_candidat: c.id, p_texte: remarque })) setRemarque('');
-                }}>Noter</button>
+                }}>Ajouter</button>
               </div>
             )}
-            <ul className="journal">
-              {journal.map((j) => (
-                <li key={j.id}>
-                  <span>
-                    <strong>{ACTIONS[j.action] || j.action}</strong>
-                    {j.action === 'etape' && <> : {libelleEtape(j.de)} → {libelleEtape(j.vers)}</>}
-                    {j.action === 'affectation' && j.vers && <> : {STATUTS_AFFECTATION.find((s) => s.k === j.vers)?.l}</>}
-                    {j.texte && <> · {j.texte}</>}
-                    <small>{court(j.le)}{j.par === moi.id ? ' · vous' : ''}</small>
-                  </span>
-                </li>
-              ))}
-              <li><span><strong>Candidature reçue</strong><small>{court(c.cree_le)}</small></span></li>
-            </ul>
           </section>
         </div>
 
         {peutAgir && (
-          <div className="panneau-foot">
+          <div className="panneau-foot dossier-pied">
             {c.etape === 'refusee' ? (
-              <button className="btn btn-primary" disabled={occupe} onClick={() => agir('changer_etape_candidat', { p_candidat: c.id, p_etape: 'nouvelle', p_motif: 'Dossier repris' })}>Reprendre le dossier</button>
+              <button className="btn btn-primary" disabled={occupe} onClick={() => agir('changer_etape_candidat', { p_candidat: c.id, p_etape: 'nouvelle', p_motif: 'Dossier repris' })}>Rouvrir le dossier</button>
             ) : (
               <>
+                {refus === null && (
+                  <button className="btn btn-danger" onClick={() => { setEntretien(null); setRefus(''); }}>Ne pas retenir</button>
+                )}
                 {(c.etape === 'preselection' || c.etape === 'entretien') && !entretien && (
                   <button className="btn btn-ghost" onClick={() => { setRefus(null); setEntretien({ le: '', lieu: c.entretien_lieu || '' }); }}>
-                    {c.etape === 'entretien' ? 'Changer l’entretien' : 'Fixer l’entretien'}
+                    {c.etape === 'entretien' ? 'Modifier la convocation' : 'Convoquer à l’entretien'}
                   </button>
                 )}
                 {suivante && (
                   <button className="btn btn-primary" disabled={occupe} onClick={() => agir('changer_etape_candidat', { p_candidat: c.id, p_etape: suivante })}>{actionSuivante}</button>
-                )}
-                {refus === null && (
-                  <button className="btn btn-danger" onClick={() => { setEntretien(null); setRefus(''); }}>Refuser</button>
                 )}
               </>
             )}

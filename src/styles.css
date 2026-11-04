@@ -618,4 +618,48 @@ body { font-size: 15px; }
 .statut-refusee { border-color: #E8B4B0; color: var(--danger); background: var(--danger-50); }
 .statut-entretien, .statut-formation { border-color: #B9C3CC; color: var(--ink); }
 
+/* ----- Fiche candidat : dossier administratif ----- */
+.dossier { width: min(640px, 100%); }
+.dossier-tete { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; padding: 20px 24px; border-bottom: 1px solid var(--line-2); background: var(--surface-2); }
+.dossier-ident { display: flex; gap: 16px; align-items: flex-start; min-width: 0; }
+.dossier-photo { width: 72px; height: 90px; flex: none; border: 1px solid var(--line-2); border-radius: 3px; background: var(--surface); overflow: hidden; display: flex; align-items: center; justify-content: center; color: var(--ink-3); font-weight: 600; text-decoration: none; }
+.dossier-photo img { width: 100%; height: 100%; object-fit: cover; }
+.dossier-numero { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.dossier-numero span { font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; letter-spacing: .04em; color: var(--ink); }
+.dossier-tete h2 { font-size: 20px; font-weight: 600; margin-top: 4px; }
+.dossier-sous { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 8px; font-size: 13px; color: var(--ink-3); }
+.dossier-corps { gap: 22px; padding: 20px 24px 28px; }
+.rubrique { display: flex; flex-direction: column; gap: 10px; }
+.rubrique > h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); padding-bottom: 8px; border-bottom: 2px solid var(--ink); }
+.rubrique-note { font-size: 12.5px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--ink-2); }
+.rubrique-action { border: 1px solid var(--line-2); border-radius: var(--r-sm); padding: 16px; background: var(--surface-2); }
+.rubrique-action > h3 { border-bottom-width: 1px; }
+.dossier .tableau-dossier { border: 1px solid var(--line); border-radius: var(--r-sm); }
+.dossier .tableau-dossier div { grid-template-columns: 180px minmax(0, 1fr); padding: 9px 14px; font-size: 14px; }
+.dossier .tableau-dossier dt { font-size: 13px; }
+.dossier-liens { display: inline-flex; gap: 12px; margin-left: 14px; font-size: 13px; font-weight: 500; }
+.grille-eval { width: 100%; border-collapse: collapse; font-size: 14px; border: 1px solid var(--line); }
+.grille-eval th { font-size: 12px; font-weight: 600; color: var(--ink-3); text-align: center; padding: 8px; border-bottom: 1px solid var(--line-2); background: var(--surface-2); }
+.grille-eval th:first-child { text-align: left; padding-left: 14px; }
+.grille-eval td { border-bottom: 1px solid var(--line); padding: 6px; }
+.grille-eval td:first-child { padding-left: 14px; color: var(--ink); }
+.grille-eval td.case { text-align: center; width: 52px; border-left: 1px solid var(--line); }
+.grille-eval td.case button { width: 26px; height: 26px; border: 1px solid var(--ink-3); border-radius: 2px; background: #fff; cursor: pointer; font-size: 16px; font-weight: 700; line-height: 1; color: var(--ink); }
+.grille-eval td.case button.coche { border-color: var(--ink); background: var(--surface-2); }
+.grille-eval td.case button:disabled { cursor: default; }
+.historique { width: 100%; border-collapse: collapse; font-size: 13.5px; border: 1px solid var(--line); }
+.historique th { text-align: left; font-size: 11.5px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); padding: 8px 12px; border-bottom: 1px solid var(--line-2); background: var(--surface-2); }
+.historique td { padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--ink-2); }
+.historique td strong { display: block; color: var(--ink); font-weight: 600; }
+.historique td small { display: block; color: var(--ink-3); font-size: 12.5px; margin-top: 2px; }
+.historique .select { min-height: 34px; font-size: 13px; width: auto; }
+.dossier-pied { justify-content: flex-end; background: var(--surface-2); }
+.dossier-pied .btn-primary { flex: none; }
+.dossier-pied .btn-danger { margin-right: auto; }
+@media (max-width: 520px) {
+  .dossier .tableau-dossier div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .grille-eval td.case { width: 38px; }
+  .dossier-pied .btn { flex: 1 1 auto; }
+}
+
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
