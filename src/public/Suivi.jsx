@@ -1,15 +1,30 @@
 import { useState } from 'react';
 import { supabase, messageErreur } from '../supabase.js';
-import { ETAPES, telCI, dateHeure, jourAn, periode } from '../libelles.js';
-import { IcoCheck, IcoAlerte, IcoLieu, IcoCalendrier, IcoFleche } from '../Icones.jsx';
+import { ETAPES, telCI, telAffiche, dateHeure, jourAn, periode } from '../libelles.js';
+import { IcoCheck, IcoAlerte } from '../Icones.jsx';
+import { EntetePage } from './Commun.jsx';
 
 const TEXTES = {
-  nouvelle: 'Votre candidature est arrivée. Un superviseur va l’étudier.',
-  preselection: 'Votre profil est retenu. Nous vous appelons pour fixer un entretien.',
-  entretien: 'Rencontre avec un superviseur : présentation, aisance, motivation.',
+  nouvelle: 'Dossier reçu, en attente d’étude par un superviseur.',
+  preselection: 'Profil retenu. Vous serez appelé(e) pour fixer un entretien.',
+  entretien: 'Entretien avec un superviseur : présentation, aisance, motivation.',
   formation: 'Formation sur le produit et le message de la marque.',
-  validee: 'Vous faites partie de l’équipe terrain. Une mission vous attend.',
+  validee: 'Intégration à l’équipe terrain et affectation aux missions.',
 };
+
+function ASavoir() {
+  return (
+    <aside className="encadre">
+      <header><h2>À savoir</h2></header>
+      <ul className="a-savoir">
+        <li><strong>Code de suivi</strong>8 caractères, affichés à la fin de la candidature.</li>
+        <li><strong>Numéro de téléphone</strong>Celui indiqué dans le formulaire de candidature.</li>
+        <li><strong>Étude des dossiers</strong>Au fil des arrivées. Les profils retenus sont contactés par téléphone.</li>
+        <li><strong>Pas encore candidat ?</strong><a href="#/postuler">Déposer une candidature</a></li>
+      </ul>
+    </aside>
+  );
+}
 
 export default function Suivi({ codeInitial }) {
   const [code, setCode] = useState(codeInitial || '');
@@ -21,111 +36,128 @@ export default function Suivi({ codeInitial }) {
   async function chercher(e) {
     e.preventDefault();
     setErreur('');
-    if (code.trim().length !== 8) { setErreur('Le code a 8 caractères. Vous l’avez reçu après votre candidature.'); return; }
-    if (!telCI(tel)) { setErreur('Le numéro doit avoir 10 chiffres.'); return; }
+    if (code.trim().length !== 8) { setErreur('Le code de suivi comporte 8 caractères.'); return; }
+    if (!telCI(tel)) { setErreur('Le numéro de téléphone doit comporter 10 chiffres.'); return; }
     setAttente(true);
     const { data, error } = await supabase.rpc('ma_candidature', { p_code: code.trim(), p_telephone: telCI(tel) });
     setAttente(false);
     if (error) { setErreur(messageErreur(error)); return; }
-    setDossier(data);
+    setDossier({ ...data, _code: code.trim(), _tel: telCI(tel) });
   }
 
   if (dossier) return <Dossier d={dossier} retour={() => setDossier(null)} />;
 
   return (
-    <section className="section" style={{ paddingTop: 48 }}>
-      <div className="container centre">
-        <span className="kicker">Suivi de candidature</span>
-        <h1 style={{ fontSize: 'clamp(32px, 5vw, 46px)' }}>Où en est mon dossier ?</h1>
-        <p style={{ color: 'var(--ink-3)', margin: '12px 0 28px', fontSize: 17 }}>
-          Entrez le code reçu après votre candidature et votre numéro de téléphone.
-        </p>
-        <form className="card card-pad" onSubmit={chercher} style={{ display: 'flex', flexDirection: 'column', gap: 18 }} noValidate>
-          <label className="field"><span>Code de suivi</span>
-            <input className="input tnum" value={code} maxLength={8} autoCapitalize="characters" spellCheck="false"
-              style={{ letterSpacing: '.18em', fontWeight: 600, textTransform: 'uppercase' }}
-              onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Ex. : 4F9A2C1B" />
-          </label>
-          <label className="field"><span>Téléphone</span>
-            <div className="input-group">
-              <span className="prefix">+225</span>
-              <input className="input" type="tel" inputMode="tel" value={tel} onChange={(e) => setTel(e.target.value)} placeholder="07 00 00 00 00" />
+    <>
+      <EntetePage titre="Suivi de candidature" texte="Consultez l’état de votre dossier avec votre code de suivi et votre numéro de téléphone." />
+      <div className="corps-page">
+        <div className="container grille-page">
+          <form className="encadre" onSubmit={chercher} noValidate>
+            <header>
+              <h2>Identification du dossier</h2>
+              <p>Les deux champs sont obligatoires.</p>
+            </header>
+            <div className="contenu">
+              <div className="grid-2">
+                <label className="field"><span>Code de suivi</span>
+                  <input className="input tnum" value={code} maxLength={8} autoCapitalize="characters" spellCheck="false"
+                    style={{ letterSpacing: '.08em', textTransform: 'uppercase' }}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Ex. 4F9A2C1B" />
+                </label>
+                <label className="field"><span>Téléphone</span>
+                  <div className="input-group">
+                    <span className="prefix">+225</span>
+                    <input className="input" type="tel" inputMode="tel" value={tel} onChange={(e) => setTel(e.target.value)} placeholder="07 00 00 00 00" />
+                  </div>
+                </label>
+              </div>
+              {erreur && <div className="alert alert-danger" role="alert"><IcoAlerte />{erreur}</div>}
             </div>
-          </label>
-          {erreur && <div className="alert alert-danger" role="alert"><IcoAlerte />{erreur}</div>}
-          <button className="btn btn-primary btn-lg" disabled={attente}>{attente ? 'Recherche…' : <>Voir mon dossier <IcoFleche taille={18} /></>}</button>
-        </form>
-        <p style={{ marginTop: 18, fontSize: 14.5, color: 'var(--ink-3)' }}>
-          Pas encore de candidature ? <a href="#/postuler">Postuler maintenant</a>
-        </p>
+            <div className="pied">
+              <span>Ces informations ne sont visibles que par vous et les recruteurs.</span>
+              <button className="btn btn-primary" disabled={attente}>{attente ? 'Recherche…' : 'Consulter le dossier'}</button>
+            </div>
+          </form>
+          <ASavoir />
+        </div>
       </div>
-    </section>
+    </>
   );
 }
 
 function Dossier({ d, retour }) {
-  const prenom = String(d.nom || '').trim().split(/\s+/).slice(-1)[0];
   const refuse = d.etape === 'refusee';
   const idx = ETAPES.findIndex((e) => e.k === d.etape);
+  const etapeActuelle = refuse ? 'Non retenue' : (ETAPES[idx]?.court || '—');
+  const entretien = !refuse && d.etape === 'entretien' && d.entretien_le;
 
   return (
-    <section className="section" style={{ paddingTop: 48 }}>
-      <div className="container centre" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <div>
-          <span className="kicker">Dossier déposé le {jourAn(d.depose_le)}</span>
-          <h1 style={{ fontSize: 'clamp(30px, 5vw, 42px)' }}>Bonjour {prenom}</h1>
+    <>
+      <EntetePage titre="Suivi de candidature" texte={`Dossier de ${d.nom}.`} />
+      <div className="corps-page">
+        <div className="container grille-page">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <section className="encadre">
+              <header><h2>Dossier</h2></header>
+              <dl className="tableau-dossier">
+                <div><dt>Candidat(e)</dt><dd>{d.nom}</dd></div>
+                <div><dt>Code de suivi</dt><dd className="tnum">{d._code}</dd></div>
+                <div><dt>Téléphone</dt><dd className="tnum">{telAffiche(d._tel)}</dd></div>
+                <div><dt>Déposé le</dt><dd>{jourAn(d.depose_le)}</dd></div>
+                <div><dt>Étape actuelle</dt><dd>{etapeActuelle}</dd></div>
+                {entretien && (
+                  <>
+                    <div><dt>Entretien</dt><dd style={{ textTransform: 'capitalize' }}>{dateHeure(d.entretien_le)}</dd></div>
+                    <div><dt>Lieu de l’entretien</dt><dd>{d.entretien_lieu}</dd></div>
+                  </>
+                )}
+                {!refuse && d.mission && (
+                  <>
+                    <div><dt>Mission</dt><dd>{d.mission.titre}</dd></div>
+                    <div><dt>Lieu</dt><dd>{d.mission.lieu}{d.mission.ville ? `, ${d.mission.ville}` : ''}</dd></div>
+                    <div><dt>Dates</dt><dd>{periode(d.mission.date_debut, d.mission.date_fin)}{d.mission.horaires ? ` · ${d.mission.horaires}` : ''}</dd></div>
+                  </>
+                )}
+              </dl>
+              {entretien && <div className="pied">Se présenter avec une pièce d’identité, 10 minutes avant l’heure.</div>}
+            </section>
+
+            {refuse ? (
+              <section className="encadre">
+                <header><h2>Décision</h2></header>
+                <div className="contenu">
+                  <p style={{ color: 'var(--ink-2)' }}>
+                    Votre candidature n’a pas été retenue. Une nouvelle candidature pourra être déposée
+                    90 jours après cette décision.
+                  </p>
+                </div>
+              </section>
+            ) : (
+              <section className="encadre">
+                <header><h2>Avancement</h2></header>
+                <div className="contenu">
+                  <ol className="timeline">
+                    {ETAPES.map((e, i) => {
+                      const cls = i < idx || d.etape === 'validee' ? 'fait' : i === idx ? 'encours' : 'attente';
+                      return (
+                        <li key={e.k} className={cls}>
+                          <span className="pt">{cls === 'fait' && <IcoCheck taille={16} />}</span>
+                          <div>
+                            <h4>{e.court}{cls === 'encours' && <span className="tag tag-em" style={{ marginLeft: 10 }}>En cours</span>}</h4>
+                            <p>{TEXTES[e.k]}</p>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </div>
+              </section>
+            )}
+            <button className="btn btn-ghost" style={{ alignSelf: 'flex-start' }} onClick={retour}>Consulter un autre dossier</button>
+          </div>
+          <ASavoir />
         </div>
-
-        {refuse && (
-          <div className="card card-pad" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <h2 style={{ fontSize: 22 }}>Votre candidature n’a pas été retenue cette fois.</h2>
-            <p style={{ color: 'var(--ink-3)' }}>
-              Merci pour votre intérêt. Les besoins changent avec chaque mission : vous pourrez postuler de nouveau
-              90 jours après cette réponse.
-            </p>
-          </div>
-        )}
-
-        {!refuse && d.etape === 'entretien' && d.entretien_le && (
-          <div className="card card-pad" style={{ background: 'var(--em-900)', color: '#fff', borderColor: 'var(--em-900)', display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <span className="eyebrow">Votre entretien</span>
-            <h2 style={{ fontSize: 26, textTransform: 'capitalize' }}>{dateHeure(d.entretien_le)}</h2>
-            <p style={{ display: 'flex', gap: 8, color: '#CFE3DA' }}><IcoLieu />{d.entretien_lieu}</p>
-            <p style={{ color: '#CFE3DA', fontSize: 14.5 }}>Venez avec votre pièce d’identité, 10 minutes en avance.</p>
-          </div>
-        )}
-
-        {!refuse && d.mission && (
-          <div className="card card-pad" style={{ display: 'flex', flexDirection: 'column', gap: 10, borderColor: 'var(--amber)' }}>
-            <span className="tag tag-amber" style={{ alignSelf: 'flex-start' }}>Votre mission</span>
-            <h2 style={{ fontSize: 24 }}>{d.mission.titre}</h2>
-            <p style={{ display: 'flex', gap: 8, color: 'var(--ink-2)' }}><IcoLieu />{d.mission.lieu}{d.mission.ville ? `, ${d.mission.ville}` : ''}</p>
-            <p style={{ display: 'flex', gap: 8, color: 'var(--ink-2)' }}><IcoCalendrier />{periode(d.mission.date_debut, d.mission.date_fin)}{d.mission.horaires ? ` · ${d.mission.horaires}` : ''}</p>
-          </div>
-        )}
-
-        {!refuse && (
-          <div className="card card-pad">
-            <h2 style={{ fontSize: 20, marginBottom: 22 }}>Les étapes</h2>
-            <ol className="timeline">
-              {ETAPES.map((e, i) => {
-                const cls = i < idx || d.etape === 'validee' ? 'fait' : i === idx ? 'encours' : 'attente';
-                return (
-                  <li key={e.k} className={cls}>
-                    <span className="pt">{cls === 'fait' && <IcoCheck taille={16} />}</span>
-                    <div>
-                      <h4>{e.court}{cls === 'encours' && <span className="tag tag-amber" style={{ marginLeft: 10 }}>En cours</span>}</h4>
-                      <p>{TEXTES[e.k]}</p>
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
-        )}
-
-        <button className="btn btn-ghost" style={{ alignSelf: 'flex-start' }} onClick={retour}>Consulter un autre dossier</button>
       </div>
-    </section>
+    </>
   );
 }

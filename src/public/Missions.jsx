@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ACTIVITES } from '../libelles.js';
-import { useMissions, CarteMission, SansMission } from './Commun.jsx';
+import { useMissions, CarteMission, SansMission, EntetePage } from './Commun.jsx';
 import { IcoAlerte } from '../Icones.jsx';
 import { messageErreur } from '../supabase.js';
 
@@ -10,15 +10,10 @@ export default function Missions() {
   const liste = type ? missions.filter((m) => m.type === type) : missions;
 
   return (
-    <section className="section" style={{ paddingTop: 48 }}>
+    <>
+    <EntetePage titre="Missions ouvertes" texte="Chaque mission indique le lieu, les dates et la rémunération. Une candidature peut aussi être déposée sans choisir de mission." />
+    <section className="corps-page">
       <div className="container">
-        <div className="section-head">
-          <div>
-            <span className="kicker">Missions ouvertes</span>
-            <h2>Trouvez votre prochaine mission</h2>
-          </div>
-          <p>Chaque mission indique le lieu, les dates et la rémunération. Pas de mission qui vous convient ? Postulez sans en choisir : nous vous rappellerons.</p>
-        </div>
 
         <div className="filtres" role="group" aria-label="Filtrer par activité">
           <button className="chip" aria-pressed={type === ''} onClick={() => setType('')}>Toutes</button>
@@ -39,5 +34,6 @@ export default function Missions() {
         )}
       </div>
     </section>
+    </>
   );
 }

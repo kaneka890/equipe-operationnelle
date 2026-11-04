@@ -6,7 +6,7 @@ import {
 import {
   IcoCheck, IcoFleche, IcoRetour, IcoAlerte, IcoCopie, IcoWhatsapp, IcoInfo, ICONE_ACTIVITE, IcoPlus, IcoAppareil,
 } from '../Icones.jsx';
-import { useMissions } from './Commun.jsx';
+import { useMissions, EntetePage } from './Commun.jsx';
 import { preparerPhoto, deposerPhoto } from '../photo.js';
 
 const ETAPES = [
@@ -157,11 +157,11 @@ export default function Postuler({ missionId }) {
   const languesAffichees = [...new Set([...LANGUES_PROPOSEES, ...f.langues])];
 
   return (
+    <>
+    <EntetePage titre="Dépôt de candidature" texte="Quatre étapes, environ cinq minutes. Les réponses restent sur cet appareil jusqu’à l’envoi." />
     <section className="form-page">
       <div className="container form-wrap">
         <aside className="stepper">
-          <h1>Ma candidature</h1>
-          <p>Environ 5 minutes. Vos réponses restent sur cet appareil jusqu’à l’envoi.</p>
           <ol className="steps-list">
             {ETAPES.map((s, i) => (
               <li key={s.t} className={i === etape ? 'actif' : i < etape ? 'fait' : ''} aria-current={i === etape ? 'step' : undefined}>
@@ -342,6 +342,7 @@ export default function Postuler({ missionId }) {
         </form>
       </div>
     </section>
+    </>
   );
 }
 
@@ -356,38 +357,48 @@ function Confirmation({ code, nom, telephone, photo }) {
   }
 
   return (
-    <section className="section" style={{ paddingTop: 48 }}>
-      <div className="container centre">
-        <div className="card card-pad" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-          <span style={{ position: 'relative', alignSelf: 'flex-start' }}>
-            {photo
-              ? <img src={photo} alt="" style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
-              : <span className="succes-ico"><IcoCheck taille={30} /></span>}
-            {photo && <span className="succes-ico" style={{ position: 'absolute', right: -6, bottom: -6, width: 28, height: 28, border: '3px solid #fff' }}><IcoCheck taille={14} /></span>}
-          </span>
-          <div>
-            <h1 style={{ fontSize: 'clamp(30px, 5vw, 40px)' }}>Merci {prenom}, c’est envoyé.</h1>
-            <p style={{ color: 'var(--ink-3)', marginTop: 10, fontSize: 17 }}>
-              Un superviseur étudie votre candidature. Si votre profil est retenu, vous êtes appelé(e)
-              au {telAffiche(telephone)} pour un entretien.
-            </p>
-          </div>
-          <div className="field">
-            <span className="label">Votre code de suivi</span>
-            <div className="code-box">
-              <strong className="tnum">{code}</strong>
-              <button className="btn btn-ghost btn-sm" onClick={copier}><IcoCopie taille={18} />{copie ? 'Copié' : 'Copier'}</button>
+    <>
+    <EntetePage titre="Candidature enregistrée" texte={`Merci ${prenom}. Votre dossier a bien été transmis à l’Équipe opérationnelle Octoplus CI.`} />
+    <div className="corps-page">
+      <div className="container grille-page">
+        <section className="encadre">
+          <header><h2>Accusé de réception</h2></header>
+          <div className="contenu">
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+              {photo
+                ? <img src={photo} alt="" style={{ width: 64, height: 64, borderRadius: 'var(--r-sm)', objectFit: 'cover', flex: 'none' }} />
+                : null}
+              <p style={{ color: 'var(--ink-2)' }}>
+                Un superviseur étudie votre candidature. Si votre profil est retenu, vous serez appelé(e)
+                au {telAffiche(telephone)} pour un entretien.
+              </p>
             </div>
-            <span className="hint">Gardez-le : avec votre numéro, il permet de suivre votre dossier à tout moment.</span>
+            <div className="field">
+              <span className="label">Code de suivi</span>
+              <div className="code-box">
+                <strong className="tnum">{code}</strong>
+                <button className="btn btn-ghost btn-sm" onClick={copier}><IcoCopie taille={18} />{copie ? 'Copié' : 'Copier'}</button>
+              </div>
+              <span className="hint">À conserver : avec votre numéro, il permet de consulter votre dossier.</span>
+            </div>
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-            <a className="btn btn-primary" href={`https://wa.me/?text=${encodeURIComponent(texte)}`} target="_blank" rel="noreferrer">
-              <IcoWhatsapp taille={18} />Me l’envoyer sur WhatsApp
+          <div className="pied">
+            <a className="btn btn-ghost" href={`https://wa.me/?text=${encodeURIComponent(texte)}`} target="_blank" rel="noreferrer">
+              <IcoWhatsapp taille={18} />Recevoir le code sur WhatsApp
             </a>
-            <a className="btn btn-ghost" href={`#/suivi?code=${code}`}>Suivre mon dossier</a>
+            <a className="btn btn-primary" href={`#/suivi?code=${code}`}>Consulter mon dossier</a>
           </div>
-        </div>
+        </section>
+        <aside className="encadre">
+          <header><h2>Suite de la procédure</h2></header>
+          <ul className="a-savoir">
+            <li><strong>1. Étude du dossier</strong>Par un superviseur, au fil des arrivées.</li>
+            <li><strong>2. Entretien</strong>Sur convocation téléphonique, pièce d’identité à présenter.</li>
+            <li><strong>3. Formation produit</strong>Avant la première mission.</li>
+          </ul>
+        </aside>
       </div>
-    </section>
+    </div>
+    </>
   );
 }

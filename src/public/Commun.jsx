@@ -87,3 +87,19 @@ export function SansMission() {
     </div>
   );
 }
+
+// En-tête des pages intérieures : fil d'Ariane, titre et une phrase.
+export function EntetePage({ titre, texte, children }) {
+  return (
+    <div className="entete-page">
+      <div className="container">
+        <nav className="fil" aria-label="Fil d’Ariane">
+          <a href="#/">Accueil</a><span aria-hidden="true">/</span><span>{titre}</span>
+        </nav>
+        <h1>{titre}</h1>
+        {texte && <p>{texte}</p>}
+        {children}
+      </div>
+    </div>
+  );
+}
