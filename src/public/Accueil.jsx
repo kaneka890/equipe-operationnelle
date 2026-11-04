@@ -14,7 +14,7 @@ export default function Accueil() {
             <span className="eyebrow">Recrutement ouvert</span>
             <h1>Le terrain, c’est <em>votre</em> scène.</h1>
             <p className="lead">
-              L’Équipe opérationnelle recrute des promotrices et promoteurs pour les marques de ses partenaires :
+              L’Équipe opérationnelle Octoplus CI recrute des promotrices et promoteurs pour les marques de ses partenaires :
               supermarchés, marchés, animations, dégustations. Des missions rémunérées, près de chez vous,
               aux jours qui vous conviennent.
             </p>
@@ -32,7 +32,7 @@ export default function Accueil() {
           <div className="badge-stack" aria-hidden="true">
             <div className="pass pass-2">
               <div className="pass-top">
-                <span className="pass-photo">ÉO</span>
+                <span className="pass-photo">OC</span>
                 <span className="tag" style={{ background: 'rgba(7,42,32,.12)', color: '#072A20' }}>Open market</span>
               </div>
               <h3>Badge de mission</h3>
