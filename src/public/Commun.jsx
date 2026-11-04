@@ -6,6 +6,10 @@ import { Marque } from '../Icones.jsx';
 export function Topbar({ chemin }) {
   const courant = (c) => (chemin === c ? 'page' : undefined);
   return (
+    <>
+    <div className="bande-officielle">
+      <div className="container">Portail de recrutement de l’Équipe opérationnelle Octoplus CI · Côte d’Ivoire</div>
+    </div>
     <header className="topbar">
       <div className="container topbar-in">
         <a className="brand" href="#/" aria-label="Équipe opérationnelle Octoplus CI, accueil">
@@ -19,6 +23,7 @@ export function Topbar({ chemin }) {
         </nav>
       </div>
     </header>
+    </>
   );
 }
 

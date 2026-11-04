@@ -561,4 +561,25 @@ p { margin: 0; }
 
 .vide { text-align: left; align-items: flex-start; padding: 28px; }
 
+/* ----- Registre administratif : bande officielle, échelle plus compacte ----- */
+.bande-officielle { background: var(--em-950); color: #D5E3DC; font-size: 12.5px; letter-spacing: .02em; }
+.bande-officielle .container { padding-top: 7px; padding-bottom: 7px; }
+@media (max-width: 560px) { .bande-officielle { font-size: 11.5px; } }
+body { font-size: 15px; }
+.topbar-in { height: 64px; }
+.nav a.lien { font-size: 14.5px; }
+.btn { min-height: 42px; font-size: 14.5px; padding: 0 18px; }
+.btn-sm { min-height: 36px; font-size: 13.5px; }
+.btn-lg { min-height: 46px; font-size: 15px; }
+.input, .select, .textarea { min-height: 44px; font-size: 15px; padding: 0 14px; }
+.textarea { padding: 12px 14px; }
+.input-group .prefix { font-weight: 500; font-size: 14.5px; }
+.field > span:not(.hint), .label { font-size: 13.5px; }
+.alert { border-radius: var(--r-sm); }
+.requis { color: var(--danger); font-weight: 600; }
+.mention { font-size: 13.5px; color: var(--ink-3); border-left: 3px solid var(--line-2); padding: 4px 0 4px 14px; }
+.mention strong { color: var(--ink-2); }
+.encadre > header h2 { font-size: 15px; }
+.a-savoir li { font-size: 13.5px; }
+
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }

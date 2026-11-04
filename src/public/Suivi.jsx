@@ -15,12 +15,12 @@ const TEXTES = {
 function ASavoir() {
   return (
     <aside className="encadre">
-      <header><h2>À savoir</h2></header>
+      <header><h2>Informations pratiques</h2></header>
       <ul className="a-savoir">
-        <li><strong>Code de suivi</strong>8 caractères, affichés à la fin de la candidature.</li>
-        <li><strong>Numéro de téléphone</strong>Celui indiqué dans le formulaire de candidature.</li>
-        <li><strong>Étude des dossiers</strong>Au fil des arrivées. Les profils retenus sont contactés par téléphone.</li>
-        <li><strong>Pas encore candidat ?</strong><a href="#/postuler">Déposer une candidature</a></li>
+        <li><strong>Code de suivi</strong>Code de 8 caractères remis à l’enregistrement de la candidature.</li>
+        <li><strong>Numéro de téléphone</strong>Numéro déclaré dans le formulaire de candidature.</li>
+        <li><strong>Traitement des dossiers</strong>Les dossiers sont étudiés dans l’ordre d’arrivée. Les candidats retenus sont convoqués par téléphone.</li>
+        <li><strong>Dépôt de candidature</strong><a href="#/postuler">Accéder au formulaire de candidature</a></li>
       </ul>
     </aside>
   );
@@ -54,28 +54,31 @@ export default function Suivi({ codeInitial }) {
         <div className="container grille-page">
           <form className="encadre" onSubmit={chercher} noValidate>
             <header>
-              <h2>Identification du dossier</h2>
-              <p>Les deux champs sont obligatoires.</p>
+              <h2>Formulaire de consultation</h2>
+              <p>Les champs marqués d’un astérisque (<span className="requis">*</span>) sont obligatoires.</p>
             </header>
             <div className="contenu">
               <div className="grid-2">
-                <label className="field"><span>Code de suivi</span>
+                <label className="field"><span>Code de suivi <span className="requis">*</span></span>
                   <input className="input tnum" value={code} maxLength={8} autoCapitalize="characters" spellCheck="false"
-                    style={{ letterSpacing: '.08em', textTransform: 'uppercase' }}
-                    onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Ex. 4F9A2C1B" />
+                    style={{ letterSpacing: '.06em', textTransform: 'uppercase' }}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())} />
+                  <span className="hint">8 caractères, lettres et chiffres.</span>
                 </label>
-                <label className="field"><span>Téléphone</span>
+                <label className="field"><span>Numéro de téléphone <span className="requis">*</span></span>
                   <div className="input-group">
                     <span className="prefix">+225</span>
-                    <input className="input" type="tel" inputMode="tel" value={tel} onChange={(e) => setTel(e.target.value)} placeholder="07 00 00 00 00" />
+                    <input className="input" type="tel" inputMode="tel" value={tel} onChange={(e) => setTel(e.target.value)} />
                   </div>
+                  <span className="hint">10 chiffres, sans indicatif.</span>
                 </label>
               </div>
               {erreur && <div className="alert alert-danger" role="alert"><IcoAlerte />{erreur}</div>}
-            </div>
-            <div className="pied">
-              <span>Ces informations ne sont visibles que par vous et les recruteurs.</span>
-              <button className="btn btn-primary" disabled={attente}>{attente ? 'Recherche…' : 'Consulter le dossier'}</button>
+              <div><button className="btn btn-primary" disabled={attente}>{attente ? 'Recherche en cours…' : 'Consulter le dossier'}</button></div>
+              <p className="mention">
+                <strong>Confidentialité.</strong> Les informations du dossier ne sont communiquées qu’au candidat
+                et aux recruteurs de l’Équipe opérationnelle Octoplus CI. Elles servent uniquement au recrutement.
+              </p>
             </div>
           </form>
           <ASavoir />
