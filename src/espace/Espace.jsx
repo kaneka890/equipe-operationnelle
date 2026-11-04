@@ -9,24 +9,51 @@ const ROLES = { admin: 'Administrateur', superviseur: 'Superviseur', direction: 
 
 // Session + profil (rôle) de la personne connectée.
 function useMoi() {
-  const [etat, setEtat] = useState({ pret: false, session: null, profil: null });
+  const [etat, setEtat] = useState({ pret: false, session: null, profil: null, erreur: null, lent: false });
   useEffect(() => {
     let vivant = true;
     async function charger(session) {
-      if (!session) { if (vivant) setEtat({ pret: true, session: null, profil: null }); return; }
-      const { data } = await supabase.from('profils').select('id, nom, role, actif').eq('id', session.user.id).maybeSingle();
-      if (vivant) setEtat({ pret: true, session, profil: data });
+      if (!session) { if (vivant) setEtat({ pret: true, session: null, profil: null, erreur: null, lent: false }); return; }
+      const { data, error } = await supabase.from('profils').select('id, nom, role, actif').eq('id', session.user.id).maybeSingle();
+      if (vivant) setEtat({ pret: true, session, profil: data, erreur: error ? messageErreur(error) : null, lent: false });
     }
     supabase.auth.getSession().then(({ data }) => charger(data.session));
-    const { data: abo } = supabase.auth.onAuthStateChange((_e, session) => charger(session));
-    return () => { vivant = false; abo.subscription.unsubscribe(); };
+    // Ne jamais appeler Supabase directement dans ce rappel : la bibliothèque y tient
+    // un verrou (renouvellement de session, toutes les heures) et la page se bloquerait.
+    const { data: abo } = supabase.auth.onAuthStateChange((_e, session) => {
+      setTimeout(() => charger(session), 0);
+    });
+    // Si rien ne répond (réseau très lent), on le dit au lieu d'une page vide.
+    const minuteur = setTimeout(() => { if (vivant) setEtat((x) => (x.pret ? x : { ...x, lent: true })); }, 8000);
+    return () => { vivant = false; clearTimeout(minuteur); abo.subscription.unsubscribe(); };
   }, []);
   return etat;
 }
 
+function Attente({ lent }) {
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 14, alignItems: 'center', color: 'var(--ink-3)' }}>
+        <p>{lent ? 'La connexion met du temps à répondre.' : 'Chargement de l’espace recruteurs…'}</p>
+        {lent && <button className="btn btn-primary" onClick={() => window.location.reload()}>Recharger la page</button>}
+      </div>
+    </div>
+  );
+}
+
 export default function Espace({ chemin }) {
-  const { pret, session, profil } = useMoi();
-  if (!pret) return <div style={{ minHeight: '100vh' }} />;
+  const { pret, session, profil, erreur, lent } = useMoi();
+  if (!pret) return <Attente lent={lent} />;
+  if (session && erreur) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <div className="alert alert-danger" role="alert" style={{ maxWidth: 460, flexDirection: 'column', alignItems: 'flex-start', gap: 12 }}>
+          <span><IcoAlerte /> {erreur}</span>
+          <button className="btn btn-ghost btn-sm" onClick={() => window.location.reload()}>Réessayer</button>
+        </div>
+      </div>
+    );
+  }
   if (!session) return <Connexion />;
 
   const role = profil?.actif ? profil.role : null;
