@@ -1,17 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase, messageErreur } from '../supabase.js';
-import { ETAPES, ACTIVITES, libelleType, initiales, JOURS } from '../libelles.js';
-import { IcoRecherche, IcoAlerte, IcoEtoile } from '../Icones.jsx';
+import { ETAPES, ACTIVITES, libelleType, initiales, telAffiche, jourAn } from '../libelles.js';
+import { IcoRecherche, IcoAlerte } from '../Icones.jsx';
 import Fiche from './Fiche.jsx';
 import { liensPhotos } from '../photo.js';
 
+const LIB_ETAPE = Object.fromEntries([...ETAPES.map((e) => [e.k, e.l]), ['refusee', 'Refusés']]);
+const STATUT = Object.fromEntries([...ETAPES.map((e) => [e.k, e.court]), ['refusee', 'Non retenu(e)']]);
+
+// Registre des candidatures : un tableau, filtré par étape (onglets) et par activité.
 export default function Pipeline({ peutAgir, moi }) {
   const [liste, setListe] = useState([]);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState('');
   const [q, setQ] = useState('');
   const [activite, setActivite] = useState('');
-  const [voirRefus, setVoirRefus] = useState(false);
+  const [etape, setEtape] = useState('');
   const [ouvert, setOuvert] = useState(null);
   const [photos, setPhotos] = useState({});
 
@@ -30,84 +34,88 @@ export default function Pipeline({ peutAgir, moi }) {
 
   useEffect(() => { charger(); }, [charger]);
 
-  const filtres = useMemo(() => {
+  const recherches = useMemo(() => {
     const t = q.trim().toLowerCase();
     return liste.filter((c) =>
       (!activite || c.activites.includes(activite)) &&
-      (!t || `${c.nom} ${c.quartier} ${c.ville} ${c.telephone}`.toLowerCase().includes(t)));
+      (!t || `${c.nom} ${c.quartier} ${c.ville} ${c.telephone} ${c.code_suivi}`.toLowerCase().includes(t)));
   }, [liste, q, activite]);
 
-  const colonnes = [...ETAPES, ...(voirRefus ? [{ k: 'refusee', l: 'Refusés' }] : [])];
-  const maintenant = Date.now();
-  const kpi = {
-    actifs: liste.filter((c) => c.etape !== 'refusee').length,
-    nouvelles: liste.filter((c) => c.etape === 'nouvelle').length,
-    entretiens: liste.filter((c) => c.etape === 'entretien' && c.entretien_le && new Date(c.entretien_le).getTime() > maintenant).length,
-    valides: liste.filter((c) => c.etape === 'validee').length,
-  };
+  const compte = (k) => recherches.filter((c) => (k ? c.etape === k : c.etape !== 'refusee')).length;
+  const lignes = recherches.filter((c) => (etape ? c.etape === etape : c.etape !== 'refusee'));
   const courant = ouvert ? liste.find((c) => c.id === ouvert) : null;
+  const onglets = [{ k: '', l: 'Dossiers en cours' }, ...ETAPES, { k: 'refusee', l: 'Refusés' }];
 
   return (
     <>
       <div className="main-head">
         <div>
-          <h1>Candidatures</h1>
-          <p>{peutAgir ? 'Ouvrez une fiche pour noter l’entretien, faire avancer ou affecter à une mission.' : 'Lecture seule : la direction consulte sans modifier.'}</p>
+          <p className="main-fil">Recrutement / Registre</p>
+          <h1>Registre des candidatures</h1>
+          <p>{peutAgir ? 'Sélectionnez un dossier pour l’étudier, fixer l’entretien, le noter ou l’affecter à une mission.' : 'Accès en lecture seule (direction).'}</p>
         </div>
-        <div className="toolbar">
+      </div>
+
+      <div className="registre">
+        <div className="onglets registre-onglets" role="group" aria-label="Filtrer par étape">
+          {onglets.map((o) => (
+            <button key={o.k || 'tous'} className="onglet" aria-pressed={etape === o.k} onClick={() => setEtape(o.k)}>
+              {o.k ? LIB_ETAPE[o.k] : o.l} <span className="tnum">{compte(o.k)}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="registre-outils">
           <label className="search">
-            <IcoRecherche taille={18} />
+            <IcoRecherche taille={16} />
             <span className="sr">Rechercher</span>
-            <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Nom, quartier, numéro…" />
+            <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Nom, commune, téléphone ou n° de dossier" />
           </label>
           <select className="select" value={activite} onChange={(e) => setActivite(e.target.value)} aria-label="Filtrer par activité">
             <option value="">Toutes les activités</option>
             {ACTIVITES.map((a) => <option key={a.k} value={a.k}>{a.l}</option>)}
           </select>
-          <label className="check" style={{ alignItems: 'center' }}>
-            <input type="checkbox" checked={voirRefus} onChange={(e) => setVoirRefus(e.target.checked)} />
-            Voir les refusés
-          </label>
+          <span className="registre-total tnum">{lignes.length} dossier{lignes.length > 1 ? 's' : ''}</span>
         </div>
-      </div>
 
-      <div className="kpis">
-        <div className="kpi"><span>Dossiers en cours</span><strong className="tnum">{kpi.actifs}</strong></div>
-        <div className="kpi"><span>Nouvelles à étudier</span><strong className="tnum">{kpi.nouvelles}</strong></div>
-        <div className="kpi"><span>Entretiens à venir</span><strong className="tnum">{kpi.entretiens}</strong></div>
-        <div className="kpi"><span>Promoteurs validés</span><strong className="tnum">{kpi.valides}</strong></div>
-      </div>
+        {erreur && <div className="alert alert-danger" style={{ margin: 16 }}><IcoAlerte />{erreur}</div>}
 
-      {erreur && <div className="alert alert-danger"><IcoAlerte />{erreur}</div>}
-
-      <div className="board-wrap">
-        <div className={`board${voirRefus ? ' avec-refus' : ''}`}>
-          {colonnes.map((col) => {
-            const cartes = filtres.filter((c) => c.etape === col.k);
-            return (
-              <section className="col" key={col.k} aria-label={col.l}>
-                <div className="col-head"><h2>{col.l}</h2><span className="n tnum">{cartes.length}</span></div>
-                {chargement && <div className="squelette" style={{ minHeight: 120, borderRadius: 12 }} />}
-                {!chargement && !cartes.length && <p className="rien">Aucun dossier</p>}
-                {cartes.map((c) => (
-                  <button key={c.id} className="carte" aria-pressed={ouvert === c.id} onClick={() => setOuvert(c.id)}>
-                    <span className="qui">
-                      <span className="av">{photos[c.photo_chemin] ? <img src={photos[c.photo_chemin]} alt="" /> : initiales(c.nom)}</span>
-                      <span style={{ minWidth: 0 }}>
-                        <span className="nom" style={{ display: 'block' }}>{c.nom}</span>
-                        <span className="ou">{c.quartier} · {c.age} ans</span>
-                      </span>
-                    </span>
-                    <span className="tags">{c.activites.map((a) => <span className="tag tag-amber" key={a}>{libelleType(a)}</span>)}</span>
-                    <span className="pied">
-                      <span>{JOURS.filter((j) => c.jours.includes(j.k)).map((j) => j.l).join(' · ')}</span>
-                      {c.moyenne != null && <span className="note-badge tnum"><IcoEtoile taille={14} />{String(c.moyenne).replace('.', ',')}</span>}
-                    </span>
-                  </button>
-                ))}
-              </section>
-            );
-          })}
+        <div className="registre-table-wrap">
+          <table className="registre-table">
+            <thead>
+              <tr>
+                <th>N° dossier</th>
+                <th>Candidat(e)</th>
+                <th>Téléphone</th>
+                <th>Commune</th>
+                <th>Activités</th>
+                <th>Déposé le</th>
+                <th>Note</th>
+                <th>Étape</th>
+              </tr>
+            </thead>
+            <tbody>
+              {chargement && <tr><td colSpan={8} className="registre-vide">Chargement du registre…</td></tr>}
+              {!chargement && !lignes.length && <tr><td colSpan={8} className="registre-vide">Aucun dossier dans cette rubrique.</td></tr>}
+              {lignes.map((c) => (
+                <tr key={c.id} aria-selected={ouvert === c.id} onClick={() => setOuvert(c.id)}>
+                  <td className="tnum mono">{c.code_suivi}</td>
+                  <td>
+                    <button className="registre-nom" onClick={(e) => { e.stopPropagation(); setOuvert(c.id); }}>
+                      <span className="av av-carre">{photos[c.photo_chemin] ? <img src={photos[c.photo_chemin]} alt="" /> : initiales(c.nom)}</span>
+                      <span><strong>{c.nom}</strong><small>{c.age} ans</small></span>
+                    </button>
+                  </td>
+                  <td className="tnum">{telAffiche(c.telephone)}</td>
+                  <td>{c.quartier}{c.ville ? `, ${c.ville}` : ''}</td>
+                  <td>{c.activites.map(libelleType).join(', ')}</td>
+                  <td className="tnum">{jourAn(c.cree_le)}</td>
+                  <td className="tnum">{c.moyenne != null ? `${String(c.moyenne).replace('.', ',')} / 5` : '—'}</td>
+                  <td><span className={`statut statut-${c.etape}`}>{STATUT[c.etape]}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
