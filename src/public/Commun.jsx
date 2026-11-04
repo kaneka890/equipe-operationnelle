@@ -18,6 +18,7 @@ export function Topbar({ chemin }) {
         </a>
         <nav className="nav" aria-label="Navigation">
           <a className="lien" href="#/missions" aria-current={courant('/missions')}>Missions</a>
+          <a className="lien" href="#/campagnes" aria-current={courant('/campagnes')}>Campagnes réalisées</a>
           <a className="lien" href="#/suivi" aria-current={courant('/suivi')}>Suivre ma candidature</a>
           <a className="btn btn-sm btn-primary" href="#/postuler">Postuler</a>
         </nav>
@@ -32,7 +33,10 @@ export function Footer() {
     <footer className="footer">
       <div className="container footer-in">
         <span>© {new Date().getFullYear()} Équipe opérationnelle Octoplus CI · Recrutement des promotrices et promoteurs terrain</span>
-        <a href="#/suivi">Suivre ma candidature</a>
+        <span style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
+          <a href="#/campagnes">Campagnes réalisées</a>
+          <a href="#/suivi">Suivre ma candidature</a>
+        </span>
       </div>
     </footer>
   );

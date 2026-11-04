@@ -5,6 +5,7 @@ import {
   etapeSuivante, initiales, telAffiche, dateHeure, court, jourAn, periode,
 } from '../libelles.js';
 import { IcoX, IcoAlerte } from '../Icones.jsx';
+import { liensPhotos, ESPACE_CAMPAGNES } from '../photo.js';
 
 const ACTIONS = { etape: 'Étape', entretien: 'Entretien fixé', affectation: 'Mission', remarque: 'Remarque' };
 
@@ -19,18 +20,27 @@ export default function Fiche({ c, photo, peutAgir, moi, onFermer, onChange }) {
   const [entretien, setEntretien] = useState(null); // { le, lieu } quand on le fixe
   const [remarque, setRemarque] = useState('');
   const [missionChoisie, setMissionChoisie] = useState('');
+  const [photosCampagnes, setPhotosCampagnes] = useState([]);
+  const [liensCampagnes, setLiensCampagnes] = useState({});
 
   const charger = useCallback(async () => {
     const [ev, jr, af, mi] = await Promise.all([
       supabase.from('evaluations_candidat').select('critere, note').eq('candidat_id', c.id),
       supabase.from('journal_candidats').select('*').eq('candidat_id', c.id).order('le', { ascending: false }),
-      supabase.from('affectations_mission').select('id, statut, le, missions_terrain(titre, lieu, date_debut, date_fin)').eq('candidat_id', c.id).order('le', { ascending: false }),
+      supabase.from('affectations_mission').select('id, statut, le, mission_id, missions_terrain(titre, lieu, date_debut, date_fin)').eq('candidat_id', c.id).order('le', { ascending: false }),
       supabase.from('missions_terrain').select('id, titre, lieu, date_debut, date_fin, places').eq('statut', 'ouverte').gte('date_fin', new Date().toISOString().slice(0, 10)).order('date_debut'),
     ]);
     setNotes(Object.fromEntries((ev.data || []).map((n) => [n.critere, n.note])));
     setJournal(jr.data || []);
     setAffectations(af.data || []);
     setMissions(mi.data || []);
+    // Photos des campagnes auxquelles il ou elle a été affecté(e).
+    const ids = [...new Set((af.data || []).filter((a) => a.statut !== 'annulee').map((a) => a.mission_id))];
+    if (!ids.length) { setPhotosCampagnes([]); return; }
+    const { data: ph } = await supabase.from('photos_campagne').select('id, chemin, legende, publique, mission_id, cree_le').in('mission_id', ids).order('cree_le');
+    setPhotosCampagnes(ph || []);
+    const l = await liensPhotos((ph || []).map((p) => p.chemin), ESPACE_CAMPAGNES);
+    setLiensCampagnes((x) => ({ ...x, ...l }));
   }, [c.id]);
 
   useEffect(() => {
@@ -66,7 +76,8 @@ export default function Fiche({ c, photo, peutAgir, moi, onFermer, onChange }) {
   const exp = EXPERIENCES.find((x) => x.k === c.experience)?.l;
   const lienWa = `https://wa.me/225${c.telephone}`;
 
-  const statutClasse = c.etape === 'refusee' ? 'statut statut-refusee' : `statut statut-${c.etape}`;
+  const avecAff = c.etape === 'formation' || c.etape === 'validee' || affectations.length > 0;
+  const statutClasse =c.etape === 'refusee' ? 'statut statut-refusee' : `statut statut-${c.etape}`;
   const statutTexte = c.etape === 'refusee' ? 'Non retenu(e)' : libelleEtape(c.etape);
 
   return (
@@ -197,7 +208,7 @@ export default function Fiche({ c, photo, peutAgir, moi, onFermer, onChange }) {
             </section>
           )}
 
-          {(c.etape === 'formation' || c.etape === 'validee' || affectations.length > 0) && (
+          {avecAff && (
             <section className="rubrique">
               <h3>5. Affectations</h3>
               {affectations.length > 0 ? (
@@ -233,8 +244,32 @@ export default function Fiche({ c, photo, peutAgir, moi, onFermer, onChange }) {
             </section>
           )}
 
+          {photosCampagnes.length > 0 && (
+            <section className="rubrique">
+              <h3>{avecAff ? '6' : '5'}. Photos des campagnes <span className="rubrique-note">{photosCampagnes.length} photo{photosCampagnes.length > 1 ? 's' : ''}</span></h3>
+              <ul className="planche planche-compacte">
+                {photosCampagnes.map((p) => {
+                  const a = affectations.find((x) => x.mission_id === p.mission_id);
+                  return (
+                    <li key={p.id}>
+                      <a href={liensCampagnes[p.chemin]} target="_blank" rel="noreferrer" className="planche-img">
+                        {liensCampagnes[p.chemin] ? <img src={liensCampagnes[p.chemin]} alt={p.legende || 'Photo de campagne'} loading="lazy" /> : null}
+                      </a>
+                      <div className="planche-infos">
+                        <span className="planche-num">{a?.missions_terrain?.titre}</span>
+                        {p.legende && <span className="hint">{p.legende}</span>}
+                        <span className="hint">{p.publique ? 'Publiée sur le site' : 'Privée'}</span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="hint">Photos déposées sur les missions où ce dossier est affecté (Missions et partenaires, colonne Photos).</p>
+            </section>
+          )}
+
           <section className="rubrique">
-            <h3>{c.etape === 'formation' || c.etape === 'validee' || affectations.length > 0 ? '6' : '5'}. Historique du dossier</h3>
+            <h3>{5 + (avecAff ? 1 : 0) + (photosCampagnes.length > 0 ? 1 : 0)}. Historique du dossier</h3>
             <table className="historique">
               <thead><tr><th>Date</th><th>Opération</th><th>Agent</th></tr></thead>
               <tbody>

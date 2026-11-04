@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase, messageErreur } from '../supabase.js';
 import { TYPES_MISSION, STATUTS_MISSION, libelleType, periode, fcfa } from '../libelles.js';
 import { IcoPlus, IcoX, IcoAlerte } from '../Icones.jsx';
+import { ajouterPhotoCampagne, supprimerPhotoCampagne, liensPhotos, ESPACE_CAMPAGNES } from '../photo.js';
 
 const NOUVELLE = {
   partenaire_id: '', type: 'degustation', titre: '', description: '', lieu: '', ville: 'Abidjan',
@@ -15,12 +16,15 @@ export default function MissionsAdmin({ peutAgir }) {
   const [erreur, setErreur] = useState('');
   const [modal, setModal] = useState(null); // 'mission' | 'partenaire'
   const [chargement, setChargement] = useState(true);
+  const [photosDe, setPhotosDe] = useState(null);
+  const [nbPhotos, setNbPhotos] = useState({});
 
   const charger = useCallback(async () => {
-    const [mi, pa, af] = await Promise.all([
+    const [mi, pa, af, ph] = await Promise.all([
       supabase.from('missions_terrain').select('*, partenaires(nom)').order('date_debut', { ascending: false }),
       supabase.from('partenaires').select('*').order('nom'),
       supabase.from('affectations_mission').select('mission_id').neq('statut', 'annulee'),
+      supabase.from('photos_campagne').select('mission_id'),
     ]);
     setChargement(false);
     const err = mi.error || pa.error || af.error;
@@ -30,6 +34,9 @@ export default function MissionsAdmin({ peutAgir }) {
     const n = {};
     (af.data || []).forEach((a) => { n[a.mission_id] = (n[a.mission_id] || 0) + 1; });
     setOccupees(n);
+    const p = {};
+    (ph.data || []).forEach((x) => { p[x.mission_id] = (p[x.mission_id] || 0) + 1; });
+    setNbPhotos(p);
   }, []);
 
   useEffect(() => { charger(); }, [charger]);
@@ -65,12 +72,12 @@ export default function MissionsAdmin({ peutAgir }) {
       <div className="table-wrap">
         <table className="table">
           <thead>
-            <tr><th>Mission</th><th>Partenaire</th><th>Dates</th><th>Tarif / jour</th><th>Places</th><th>Statut</th></tr>
+            <tr><th>Mission</th><th>Partenaire</th><th>Dates</th><th>Tarif / jour</th><th>Places</th><th>Statut</th><th>Photos</th></tr>
           </thead>
           <tbody>
-            {chargement && <tr><td colSpan={6}><div className="squelette" style={{ minHeight: 60 }} /></td></tr>}
+            {chargement && <tr><td colSpan={7}><div className="squelette" style={{ minHeight: 60 }} /></td></tr>}
             {!chargement && !missions.length && (
-              <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--ink-3)', padding: 40 }}>Aucune mission pour l’instant.</td></tr>
+              <tr><td colSpan={7} style={{ textAlign: 'center', color: 'var(--ink-3)', padding: 40 }}>Aucune mission pour l’instant.</td></tr>
             )}
             {missions.map((m) => {
               const pris = occupees[m.id] || 0;
@@ -94,6 +101,11 @@ export default function MissionsAdmin({ peutAgir }) {
                       onChange={(e) => changerStatut(m, e.target.value)}>
                       {STATUTS_MISSION.map((s) => <option key={s.k} value={s.k}>{s.l}</option>)}
                     </select>
+                  </td>
+                  <td>
+                    <button className="btn btn-ghost btn-sm" onClick={() => setPhotosDe(m)}>
+                      Photos{nbPhotos[m.id] ? ` (${nbPhotos[m.id]})` : ''}
+                    </button>
                   </td>
                 </tr>
               );
@@ -119,6 +131,7 @@ export default function MissionsAdmin({ peutAgir }) {
         </table>
       </div>
 
+      {photosDe && <ModalPhotos mission={photosDe} peutAgir={peutAgir} onFermer={() => { setPhotosDe(null); charger(); }} />}
       {modal === 'mission' && <ModalMission partenaires={partenaires} onFermer={() => setModal(null)} onFait={() => { setModal(null); charger(); }} />}
       {modal === 'partenaire' && <ModalPartenaire onFermer={() => setModal(null)} onFait={() => { setModal(null); charger(); }} />}
     </>
@@ -267,6 +280,109 @@ function ModalPartenaire({ onFermer, onFait }) {
         <span>Afficher son nom sur le site public. Décochez pour une mission confidentielle : les candidats le découvriront à l’entretien.</span>
       </label>
       {erreur && <div className="alert alert-danger" role="alert"><IcoAlerte />{erreur}</div>}
+    </Modal>
+  );
+}
+
+// Photos d'une campagne : dépôt, légende, publication sur le site, suppression.
+function ModalPhotos({ mission, peutAgir, onFermer }) {
+  const [photos, setPhotos] = useState([]);
+  const [liens, setLiens] = useState({});
+  const [erreur, setErreur] = useState('');
+  const [envoi, setEnvoi] = useState(null); // { fait, total }
+  const [chargement, setChargement] = useState(true);
+
+  const charger = useCallback(async () => {
+    const { data, error } = await supabase.from('photos_campagne').select('*').eq('mission_id', mission.id).order('cree_le');
+    setChargement(false);
+    if (error) { setErreur(messageErreur(error)); return; }
+    setPhotos(data || []);
+    const l = await liensPhotos((data || []).map((p) => p.chemin), ESPACE_CAMPAGNES);
+    setLiens((x) => ({ ...x, ...l }));
+  }, [mission.id]);
+
+  useEffect(() => { charger(); }, [charger]);
+
+  async function deposer(e) {
+    const fichiers = [...(e.target.files || [])];
+    e.target.value = '';
+    if (!fichiers.length) return;
+    setErreur('');
+    const echecs = [];
+    for (let i = 0; i < fichiers.length; i += 1) {
+      setEnvoi({ fait: i, total: fichiers.length });
+      try { await ajouterPhotoCampagne(mission.id, fichiers[i]); } catch (err) { echecs.push(`${fichiers[i].name} : ${err.message || messageErreur(err)}`); }
+    }
+    setEnvoi(null);
+    if (echecs.length) setErreur(`Non déposées — ${echecs.join(' ; ')}`);
+    charger();
+  }
+
+  async function maj(p, champs) {
+    setErreur('');
+    setPhotos((l) => l.map((x) => (x.id === p.id ? { ...x, ...champs } : x)));
+    const { error } = await supabase.from('photos_campagne').update(champs).eq('id', p.id);
+    if (error) { setErreur(messageErreur(error)); charger(); }
+  }
+
+  async function supprimer(p) {
+    if (!window.confirm('Supprimer définitivement cette photo ?')) return;
+    setErreur('');
+    try { await supprimerPhotoCampagne(p); } catch (err) { setErreur(messageErreur(err)); }
+    charger();
+  }
+
+  const publiees = photos.filter((p) => p.publique).length;
+
+  return (
+    <Modal titre="Photos de la campagne" onFermer={onFermer} pied={<button className="btn btn-primary" onClick={onFermer}>Fermer</button>}>
+      <dl className="tableau-dossier cadre-fin">
+        <div><dt>Mission</dt><dd>{mission.titre}</dd></div>
+        <div><dt>Partenaire</dt><dd>{mission.partenaires?.nom}</dd></div>
+        <div><dt>Période</dt><dd>{periode(mission.date_debut, mission.date_fin)}</dd></div>
+        <div><dt>Photos</dt><dd className="tnum">{photos.length} dont {publiees} publiée{publiees > 1 ? 's' : ''} sur le site</dd></div>
+      </dl>
+
+      {peutAgir && (
+        <div className="depot-photos">
+          <label className={`btn btn-primary${envoi ? ' disabled' : ''}`}>
+            <input type="file" accept="image/*" multiple className="sr" onChange={deposer} disabled={!!envoi} />
+            {envoi ? `Envoi ${envoi.fait + 1} / ${envoi.total}…` : 'Ajouter des photos'}
+          </label>
+          <p className="hint">Plusieurs photos à la fois. Elles sont réduites avant l’envoi et restent privées tant qu’elles ne sont pas publiées.</p>
+        </div>
+      )}
+      <p className="mention">
+        <strong>Publication.</strong> Ne publier une photo sur le site qu’avec l’accord des personnes visibles.
+        Une photo publiée apparaît dans « Campagnes réalisées » dès que la campagne a commencé.
+      </p>
+
+      {erreur && <div className="alert alert-danger" role="alert"><IcoAlerte />{erreur}</div>}
+
+      {chargement ? <p className="hint">Chargement…</p> : !photos.length ? (
+        <p className="hint">Aucune photo pour cette campagne.</p>
+      ) : (
+        <ul className="planche">
+          {photos.map((p, i) => (
+            <li key={p.id}>
+              <a href={liens[p.chemin]} target="_blank" rel="noreferrer" className="planche-img">
+                {liens[p.chemin] ? <img src={liens[p.chemin]} alt={p.legende || `Photo ${i + 1}`} loading="lazy" /> : null}
+              </a>
+              <div className="planche-infos">
+                <span className="planche-num tnum">Photo {i + 1}</span>
+                <input className="input" defaultValue={p.legende || ''} maxLength={200} placeholder="Légende (facultatif)"
+                  disabled={!peutAgir} aria-label={`Légende de la photo ${i + 1}`}
+                  onBlur={(e) => { const v = e.target.value.trim() || null; if (v !== (p.legende || null)) maj(p, { legende: v }); }} />
+                <label className="check">
+                  <input type="checkbox" checked={p.publique} disabled={!peutAgir} onChange={(e) => maj(p, { publique: e.target.checked })} />
+                  Publier sur le site
+                </label>
+                {peutAgir && <button className="lien-suppr" onClick={() => supprimer(p)}>Supprimer</button>}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </Modal>
   );
 }

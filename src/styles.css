@@ -662,4 +662,33 @@ body { font-size: 15px; }
   .dossier-pied .btn { flex: 1 1 auto; }
 }
 
+/* ----- Photos de campagne ----- */
+.cadre-fin { border: 1px solid var(--line); border-radius: var(--r-sm); }
+.cadre-fin div { grid-template-columns: 130px minmax(0, 1fr) !important; padding: 8px 14px !important; font-size: 14px !important; }
+.depot-photos { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.depot-photos label.btn { cursor: pointer; }
+.depot-photos label.btn.disabled { opacity: .6; pointer-events: none; }
+.planche { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 520px) { .planche { grid-template-columns: minmax(0, 1fr); } }
+.planche li { border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; background: var(--surface); display: flex; flex-direction: column; }
+.planche-img { display: block; aspect-ratio: 4 / 3; background: var(--surface-2); }
+.planche-img img { width: 100%; height: 100%; object-fit: cover; }
+.planche-infos { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); }
+.planche-num { font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--ink-2); }
+.planche-infos .input { min-height: 36px; font-size: 13.5px; }
+.planche-infos .check { font-size: 13.5px; display: flex; gap: 8px; align-items: center; }
+.lien-suppr { align-self: flex-start; background: none; border: 0; padding: 0; color: var(--danger); font-size: 13px; text-decoration: underline; cursor: pointer; }
+.planche-compacte { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.planche-compacte .planche-infos { gap: 2px; padding: 8px 10px; }
+@media (max-width: 520px) { .planche-compacte { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.rubriques-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 900px) { .rubriques-3 div:last-child { grid-column: auto; } }
+.galerie { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; padding: 20px 28px 24px; border-top: 1px solid var(--line); }
+@media (max-width: 560px) { .galerie { padding: 16px 20px 20px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } }
+.galerie figure { margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.galerie-img { display: block; aspect-ratio: 4 / 3; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; }
+.galerie-img img { width: 100%; height: 100%; object-fit: cover; }
+.galerie figcaption { font-size: 13px; color: var(--ink-3); line-height: 1.4; }
+
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
