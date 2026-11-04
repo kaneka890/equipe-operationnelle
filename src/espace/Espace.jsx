@@ -58,7 +58,7 @@ export default function Espace({ chemin }) {
         <nav aria-label="Espace recruteur">
           <a href="#/espace" aria-current={page === 'candidatures' ? 'page' : undefined}><IcoTableau />Candidatures</a>
           <a href="#/espace/missions" aria-current={page === 'missions' ? 'page' : undefined}><IcoMallette />Missions et partenaires</a>
-          <a href="#/" target="_blank" rel="noreferrer"><IcoFleche />Voir le site public</a>
+          <a href="./index.html" target="_blank" rel="noreferrer"><IcoFleche />Voir le site public</a>
         </nav>
         <div className="moi">
           <span className="av">{initiales(profil.nom)}</span>
@@ -94,7 +94,7 @@ function Connexion() {
   return (
     <div className="login">
       <div className="login-art">
-        <a className="brand" href="#/" style={{ color: '#fff' }}>
+        <a className="brand" href="./index.html" style={{ color: '#fff' }}>
           <span className="brand-mark" style={{ background: '#fff' }}><Marque clair /></span>
           <span>Octoplus CI<small>Équipe opérationnelle · Recrutement</small></span>
         </a>
@@ -119,7 +119,7 @@ function Connexion() {
           </label>
           {erreur && <div className="alert alert-danger" role="alert"><IcoAlerte />{erreur}</div>}
           <button className="btn btn-primary btn-lg" disabled={attente}>{attente ? 'Connexion…' : 'Se connecter'}</button>
-          <a href="#/" style={{ fontSize: 14.5 }}>Retour au site public</a>
+          <a href="./index.html" style={{ fontSize: 14.5 }}>Retour au site public</a>
         </form>
       </div>
     </div>

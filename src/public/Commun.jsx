@@ -29,10 +29,7 @@ export function Footer() {
     <footer className="footer">
       <div className="container footer-in">
         <span>© {new Date().getFullYear()} Équipe opérationnelle Octoplus CI · Recrutement des promotrices et promoteurs terrain</span>
-        <span style={{ display: 'flex', gap: 18 }}>
-          <a href="#/suivi">Suivre ma candidature</a>
-          <a href="#/espace">Espace recruteur</a>
-        </span>
+        <a href="#/suivi">Suivre ma candidature</a>
       </div>
     </footer>
   );

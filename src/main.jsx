@@ -7,12 +7,9 @@ import Accueil from './public/Accueil.jsx';
 import Missions from './public/Missions.jsx';
 import Postuler from './public/Postuler.jsx';
 import Suivi from './public/Suivi.jsx';
-import Espace from './espace/Espace.jsx';
 
 function App() {
   const { path, params } = useRoute();
-
-  if (path.startsWith('/espace')) return <Espace chemin={path} />;
 
   let page;
   if (path === '/missions') page = <Missions />;
