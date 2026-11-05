@@ -515,6 +515,14 @@ p { margin: 0; }
   .acces-form { width: min(440px, 100%); }
 }
 
+/* Comptes */
+.comptes-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.comptes-remise { width: 100%; border-collapse: collapse; font-size: 15px; }
+.comptes-remise th, .comptes-remise td { padding: 10px 12px; border: 1px solid var(--line); text-align: left; }
+.comptes-remise th { width: 42%; font-weight: 600; background: var(--surface-2); }
+.comptes-mdp { font-family: Consolas, 'Courier New', monospace; font-size: 16px; letter-spacing: .04em; }
+.main > .acces-form { width: min(420px, 100%); }
+
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 60; background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 12px; font-size: 14.5px; box-shadow: var(--sh-3); animation: fondu .2s; max-width: calc(100% - 32px); }
 
 /* ----- Pages intérieures (registre institutionnel) ----- */

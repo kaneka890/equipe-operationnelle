@@ -138,7 +138,7 @@ export default function MissionsAdmin({ peutAgir }) {
   );
 }
 
-function Modal({ titre, onFermer, children, pied }) {
+export function Modal({ titre, onFermer, children, pied }) {
   useEffect(() => {
     const f = (e) => { if (e.key === 'Escape') onFermer(); };
     window.addEventListener('keydown', f);

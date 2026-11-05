@@ -7,6 +7,8 @@ const I = (chemins) => function Icone({ taille = 20, ...p }) {
   return <svg {...base} width={taille} height={taille} {...p}>{chemins}</svg>;
 };
 
+export const IcoComptes = I(<><circle cx="9" cy="8" r="3.5" /><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" /><path d="M16 4.8a3.5 3.5 0 0 1 0 6.4" /><path d="M18 14.4c1.8.8 3 2.7 3 5.6" /></>);
+export const IcoCle = I(<><circle cx="8" cy="15" r="4" /><path d="M11 12l8-8" /><path d="M16 7l3 3" /></>);
 export const IcoFleche = I(<><path d="M5 12h14" /><path d="M13 6l6 6-6 6" /></>);
 export const IcoRetour = I(<><path d="M19 12H5" /><path d="M11 18l-6-6 6-6" /></>);
 export const IcoCheck = I(<path d="M5 12.5l4.5 4.5L19 7.5" />);

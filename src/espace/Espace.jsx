@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { supabase, messageErreur } from '../supabase.js';
 import { initiales } from '../libelles.js';
-import { Marque, IcoTableau, IcoMallette, IcoSortie, IcoAlerte, IcoFleche } from '../Icones.jsx';
+import { Marque, IcoTableau, IcoMallette, IcoSortie, IcoAlerte, IcoFleche, IcoComptes, IcoCle } from '../Icones.jsx';
 import Pipeline from './Pipeline.jsx';
 import MissionsAdmin from './MissionsAdmin.jsx';
-
-const ROLES = { admin: 'Administrateur', superviseur: 'Superviseur', direction: 'Direction' };
+import Comptes, { ROLES, FormulaireMotDePasse } from './Comptes.jsx';
 
 // Session + profil (rôle) de la personne connectée.
 function useMoi() {
@@ -14,7 +13,7 @@ function useMoi() {
     let vivant = true;
     async function charger(session) {
       if (!session) { if (vivant) setEtat({ pret: true, session: null, profil: null, erreur: null, lent: false }); return; }
-      const { data, error } = await supabase.from('profils').select('id, nom, role, actif').eq('id', session.user.id).maybeSingle();
+      const { data, error } = await supabase.from('profils').select('id, nom, role, actif, mdp_provisoire').eq('id', session.user.id).maybeSingle();
       if (vivant) setEtat({ pret: true, session, profil: data, erreur: error ? messageErreur(error) : null, lent: false });
     }
     supabase.auth.getSession().then(({ data }) => charger(data.session));
@@ -74,19 +73,29 @@ export default function Espace({ chemin }) {
     );
   }
 
+  // Un mot de passe provisoire est connu de l'administrateur : on n'entre pas avec.
+  if (profil.mdp_provisoire) {
+    return <CadreAcces><FormulaireMotDePasse impose onFait={() => window.location.reload()} /></CadreAcces>;
+  }
+
   const peutAgir = role === 'admin' || role === 'superviseur';
-  const page = chemin.startsWith('/espace/missions') ? 'missions' : 'candidatures';
+  const page = chemin.startsWith('/espace/missions') ? 'missions'
+    : chemin.startsWith('/espace/comptes') && role === 'admin' ? 'comptes'
+    : chemin.startsWith('/espace/mot-de-passe') ? 'mot-de-passe'
+    : 'candidatures';
 
   return (
     <div className="app">
       <aside className="side">
         <a className="brand" href="#/espace" style={{ color: '#fff' }}>
           <span className="brand-mark" style={{ background: '#fff' }}><Marque clair /></span>
-          <span>Octoplus CI<small>Équipe opérationnelle · Recrutement</small></span>
+          <span>Octoplus CI<small>Équipe opérationnelle</small></span>
         </a>
         <nav aria-label="Espace recruteur">
           <a href="#/espace" aria-current={page === 'candidatures' ? 'page' : undefined}><IcoTableau />Candidatures</a>
           <a href="#/espace/missions" aria-current={page === 'missions' ? 'page' : undefined}><IcoMallette />Missions et partenaires</a>
+          {role === 'admin' && <a href="#/espace/comptes" aria-current={page === 'comptes' ? 'page' : undefined}><IcoComptes />Comptes</a>}
+          <a href="#/espace/mot-de-passe" aria-current={page === 'mot-de-passe' ? 'page' : undefined}><IcoCle />Mon mot de passe</a>
           <a href="./index.html" target="_blank" rel="noreferrer"><IcoFleche />Voir le site public</a>
         </nav>
         <div className="moi">
@@ -96,9 +105,15 @@ export default function Espace({ chemin }) {
         </div>
       </aside>
       <main className="main">
-        {page === 'missions'
-          ? <MissionsAdmin peutAgir={peutAgir} />
-          : <Pipeline peutAgir={peutAgir} moi={profil} />}
+        {page === 'missions' && <MissionsAdmin peutAgir={peutAgir} />}
+        {page === 'comptes' && <Comptes moi={profil} />}
+        {page === 'mot-de-passe' && (
+          <>
+            <div className="main-head"><div><p className="main-fil">Recrutement / Mon mot de passe</p><h1>Mon mot de passe</h1></div></div>
+            <FormulaireMotDePasse />
+          </>
+        )}
+        {page === 'candidatures' && <Pipeline peutAgir={peutAgir} moi={profil} />}
       </main>
     </div>
   );
@@ -158,7 +173,7 @@ function Connexion() {
       <form className="acces-form" onSubmit={entrer} noValidate>
         <div>
           <h1>Connexion</h1>
-          <p>Identifiez-vous avec votre compte Suivi terrain.</p>
+          <p>Identifiez-vous avec votre compte personnel.</p>
         </div>
         <label className="field"><span>Adresse e-mail</span>
           {/* Pas de saisie automatique au doigt : le clavier cacherait la page. */}
@@ -173,7 +188,7 @@ function Connexion() {
         </div>
         {erreur && <div className="alert alert-danger" role="alert"><IcoAlerte />{erreur}</div>}
         <button className="btn btn-primary btn-lg" disabled={attente}>{attente ? 'Connexion…' : 'Se connecter'}</button>
-        <p className="acces-note">Mot de passe oublié : l’administrateur le réinitialise depuis Suivi terrain.</p>
+        <p className="acces-note">Mot de passe oublié : un administrateur le réinitialise depuis la rubrique Comptes.</p>
       </form>
     </CadreAcces>
   );
