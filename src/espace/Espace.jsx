@@ -67,7 +67,7 @@ export default function Espace({ chemin }) {
               de l’Équipe opérationnelle Octoplus CI y entrent.
             </p>
           </div>
-          <button className="btn btn-ghost" onClick={() => supabase.auth.signOut()}>Se déconnecter</button>
+          <button className="btn btn-ghost" onClick={() => supabase.auth.signOut({ scope: 'local' })}>Se déconnecter</button>
         </div>
       </CadreAcces>
     );
@@ -101,7 +101,7 @@ export default function Espace({ chemin }) {
         <div className="moi">
           <span className="av">{initiales(profil.nom)}</span>
           <span className="qui"><strong>{profil.nom}</strong><span>{ROLES[role]}</span></span>
-          <button aria-label="Se déconnecter" title="Se déconnecter" onClick={() => supabase.auth.signOut()}><IcoSortie /></button>
+          <button aria-label="Se déconnecter" title="Se déconnecter" onClick={() => supabase.auth.signOut({ scope: 'local' })}><IcoSortie /></button>
         </div>
       </aside>
       <main className="main">

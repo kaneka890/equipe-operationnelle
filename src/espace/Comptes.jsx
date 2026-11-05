@@ -18,9 +18,19 @@ function motDePasseProvisoire() {
   return Array.from(tirage, (n) => SIGNES[n % SIGNES.length]).join('');
 }
 
+const SESSION_FERMEE = 'Votre session n’est plus valide. Déconnectez-vous, reconnectez-vous, puis recommencez.';
+
 // Appelle une fonction serveur ; rend le message d'erreur qu'elle a écrit.
 async function appeler(fonction, body) {
-  const { data, error } = await supabase.functions.invoke(fonction, { body });
+  let { data, error } = await supabase.functions.invoke(fonction, { body });
+  // La base accepte un jeton jusqu'à son expiration, même si la session a été
+  // fermée ; le serveur de comptes, lui, le refuse. On renouvelle une fois.
+  if (error?.context?.status === 401) {
+    const { data: r, error: e } = await supabase.auth.refreshSession();
+    if (e || !r.session) throw new Error(SESSION_FERMEE);
+    ({ data, error } = await supabase.functions.invoke(fonction, { body }));
+    if (error?.context?.status === 401) throw new Error(SESSION_FERMEE);
+  }
   if (!error) return data;
   let message = '';
   try { message = (await error.context.json()).error; } catch { /* réponse sans message */ }
