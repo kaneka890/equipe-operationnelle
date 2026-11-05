@@ -692,3 +692,8 @@ body { font-size: 15px; }
 .galerie figcaption { font-size: 13px; color: var(--ink-3); line-height: 1.4; }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* Registre public des campagnes */
+.registre-public { min-width: 720px; }
+.encadre .galerie { padding: 20px 24px 24px; }
+.galerie figcaption .tnum { font-weight: 600; color: var(--ink-2); }
