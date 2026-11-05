@@ -60,19 +60,16 @@ export default function Espace({ chemin }) {
   if (!ROLES[role]) {
     return (
       <CadreAcces>
-        <section className="acces-carte acces-carte-etroite" aria-labelledby="acces-titre">
-          <div className="acces-entete">
-            <span className="acces-rubrique">Espace recruteurs</span>
-            <h1 id="acces-titre">Accès non autorisé</h1>
-          </div>
-          <div className="acces-form">
-            <p style={{ color: 'var(--ink-2)' }}>
+        <div className="acces-form">
+          <div>
+            <h1>Accès non autorisé</h1>
+            <p>
               Ce compte n’a pas accès au recrutement. Seuls l’administrateur, les superviseurs et la direction
               de l’Équipe opérationnelle Octoplus CI y entrent.
             </p>
-            <button className="btn btn-ghost" onClick={() => supabase.auth.signOut()}>Se déconnecter</button>
           </div>
-        </section>
+          <button className="btn btn-ghost" onClick={() => supabase.auth.signOut()}>Se déconnecter</button>
+        </div>
       </CadreAcces>
     );
   }
@@ -107,26 +104,34 @@ export default function Espace({ chemin }) {
   );
 }
 
-// Cadre des pages d'accès : bande officielle, en-tête, contenu, pied de page.
+// Cadre des pages d'accès : colonne d'identité à gauche, contenu à droite.
 function CadreAcces({ children }) {
   return (
     <div className="acces">
-      <div className="bande-officielle">
-        <div className="container">Portail de recrutement de l’Équipe opérationnelle Octoplus CI · Accès réservé</div>
-      </div>
-      <header className="acces-tete">
-        <div className="container acces-tete-in">
-          <a className="brand" href="./index.html" aria-label="Équipe opérationnelle Octoplus CI, site public">
-            <span className="brand-mark"><Marque /></span>
-            <span>Octoplus CI<small>Équipe opérationnelle</small></span>
-          </a>
-          <a className="acces-lien" href="./index.html">Site public</a>
+      <aside className="acces-identite">
+        <svg className="acces-filigrane" viewBox="0 0 32 32" aria-hidden="true">
+          <circle cx="16" cy="16" r="10" stroke="currentColor" strokeWidth="3.4" fill="none" strokeDasharray="48 15" strokeLinecap="round" transform="rotate(-50 16 16)" />
+          <circle cx="16" cy="16" r="3.6" fill="currentColor" />
+        </svg>
+        <a className="brand" href="./index.html" aria-label="Équipe opérationnelle Octoplus CI, site public">
+          <span className="brand-mark"><Marque clair /></span>
+          <span>Octoplus CI<small>Équipe opérationnelle</small></span>
+        </a>
+        <div className="acces-presentation">
+          <h2>Espace recruteurs</h2>
+          <dl>
+            <div><dt>Candidatures</dt><dd>Registre, entretiens, décisions</dd></div>
+            <div><dt>Missions</dt><dd>Partenaires, postes, affectations</dd></div>
+            <div><dt>Campagnes</dt><dd>Photographies et publication</dd></div>
+          </dl>
         </div>
-      </header>
-      <main className="acces-corps">{children}</main>
-      <footer className="acces-pied">
-        <div className="container">© {new Date().getFullYear()} Équipe opérationnelle Octoplus CI · Côte d’Ivoire</div>
-      </footer>
+        <p className="acces-mention">Accès réservé à l’administrateur, aux superviseurs et à la direction. Dossiers confidentiels.</p>
+      </aside>
+      <main className="acces-contenu">
+        <a className="acces-lien" href="./index.html">Site public</a>
+        <div className="acces-centre">{children}</div>
+        <p className="acces-pied">© {new Date().getFullYear()} Équipe opérationnelle Octoplus CI · Côte d’Ivoire</p>
+      </main>
     </div>
   );
 }
@@ -150,37 +155,26 @@ function Connexion() {
 
   return (
     <CadreAcces>
-      <section className="acces-carte" aria-labelledby="acces-titre">
-        <div className="acces-entete">
-          <span className="acces-rubrique">Espace recruteurs</span>
-          <h1 id="acces-titre">Connexion</h1>
+      <form className="acces-form" onSubmit={entrer} noValidate>
+        <div>
+          <h1>Connexion</h1>
+          <p>Identifiez-vous avec votre compte Suivi terrain.</p>
         </div>
-        <div className="acces-grille">
-          <form className="acces-form" onSubmit={entrer} noValidate>
-            <label className="field"><span>Adresse e-mail</span>
-              <input className="input" type="email" autoComplete="username" autoFocus value={email} onChange={(e) => setEmail(e.target.value)} />
-            </label>
-            <div className="field">
-              <label htmlFor="acces-mdp" className="label">Mot de passe</label>
-              <div className="input-group">
-                <input id="acces-mdp" className="input" type={voir ? 'text' : 'password'} autoComplete="current-password" value={mdp} onChange={(e) => setMdp(e.target.value)} />
-                <button type="button" className="acces-voir" aria-pressed={voir} onClick={() => setVoir(!voir)}>{voir ? 'Masquer' : 'Afficher'}</button>
-              </div>
-            </div>
-            {erreur && <div className="alert alert-danger" role="alert"><IcoAlerte />{erreur}</div>}
-            <button className="btn btn-primary btn-lg" disabled={attente}>{attente ? 'Connexion…' : 'Se connecter'}</button>
-          </form>
-          <aside className="acces-infos" aria-label="Informations">
-            <h2>Informations</h2>
-            <dl>
-              <div><dt>Compte</dt><dd>Le même e-mail et le même mot de passe que l’application Suivi terrain.</dd></div>
-              <div><dt>Accès</dt><dd>Administrateur, superviseurs et direction.</dd></div>
-              <div><dt>Mot de passe oublié</dt><dd>L’administrateur le réinitialise depuis Suivi terrain.</dd></div>
-              <div><dt>Confidentialité</dt><dd>Les dossiers contiennent des données personnelles. Déconnectez-vous après usage sur un poste partagé.</dd></div>
-            </dl>
-          </aside>
+        <label className="field"><span>Adresse e-mail</span>
+          {/* Pas de saisie automatique au doigt : le clavier cacherait la page. */}
+          <input className="input" type="email" autoComplete="username" autoFocus={window.matchMedia('(hover: hover)').matches} value={email} onChange={(e) => setEmail(e.target.value)} />
+        </label>
+        <div className="field">
+          <label htmlFor="acces-mdp" className="label">Mot de passe</label>
+          <div className="acces-mdp">
+            <input id="acces-mdp" className="input" type={voir ? 'text' : 'password'} autoComplete="current-password" value={mdp} onChange={(e) => setMdp(e.target.value)} />
+            <button type="button" aria-pressed={voir} onClick={() => setVoir(!voir)}>{voir ? 'Masquer' : 'Afficher'}</button>
+          </div>
         </div>
-      </section>
+        {erreur && <div className="alert alert-danger" role="alert"><IcoAlerte />{erreur}</div>}
+        <button className="btn btn-primary btn-lg" disabled={attente}>{attente ? 'Connexion…' : 'Se connecter'}</button>
+        <p className="acces-note">Mot de passe oublié : l’administrateur le réinitialise depuis Suivi terrain.</p>
+      </form>
     </CadreAcces>
   );
 }

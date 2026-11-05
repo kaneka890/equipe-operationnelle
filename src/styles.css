@@ -472,38 +472,47 @@ p { margin: 0; }
 .modal-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
 .modal-foot { flex: none; padding: 14px 24px; border-top: 1px solid var(--line); background: var(--surface-2); display: flex; justify-content: flex-end; gap: 10px; }
 
-/* Pages d'accès (connexion, accès refusé) */
-.acces { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; background: var(--bg); }
-.acces-tete { background: var(--surface); border-bottom: 1px solid var(--line); }
-.acces-tete-in { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; }
-.acces-lien { font-size: 14px; font-weight: 500; color: var(--ink-2); }
-.acces-corps { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
-.acces-carte { width: min(860px, 100%); background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--em-900); border-radius: var(--r-sm); box-shadow: var(--sh-1); }
-.acces-carte-etroite { width: min(520px, 100%); }
-.acces-entete { padding: 26px 32px 22px; border-bottom: 1px solid var(--line); }
-.acces-rubrique { display: block; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--em-700); }
-.acces-entete h1 { font-size: 26px; margin-top: 6px; }
-.acces-grille { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
-.acces-form { padding: 28px 32px 32px; display: flex; flex-direction: column; gap: 20px; }
-.acces-form .btn { width: 100%; }
-.acces-form .input-group .input { flex: 1; min-width: 0; }
-.acces-voir { flex: none; padding: 0 14px; border: 0; border-left: 1px solid var(--line); background: var(--surface-2); color: var(--ink-2); font-size: 13.5px; font-weight: 500; cursor: pointer; }
-.acces-voir:hover { color: var(--ink); background: var(--line); }
-.acces-voir:focus-visible { outline-offset: -3px; }
-.acces-infos { padding: 28px 32px 32px; background: #FAFBFB; border-left: 1px solid var(--line); border-bottom-right-radius: var(--r-sm); }
-.acces-infos h2 { font-size: 14px; }
-.acces-infos dl { margin: 12px 0 0; }
-.acces-infos dl > div { padding: 12px 0; border-top: 1px solid var(--line); }
-.acces-infos dl > div:last-child { padding-bottom: 0; }
-.acces-infos dt { font-size: 13px; font-weight: 600; color: var(--ink); }
-.acces-infos dd { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-3); }
-.acces-pied { padding: 16px 0; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-3); }
-@media (max-width: 760px) {
-  .acces-corps { align-items: flex-start; padding: 20px 16px; }
-  .acces-grille { grid-template-columns: minmax(0, 1fr); }
-  .acces-entete { padding: 22px 20px 18px; }
-  .acces-form, .acces-infos { padding: 22px 20px 24px; }
-  .acces-infos { border-left: 0; border-top: 1px solid var(--line); border-bottom-left-radius: var(--r-sm); }
+/* Pages d'accès (connexion, accès refusé) : tient sans défilement, même sur un petit écran */
+.acces { min-height: 100vh; min-height: 100dvh; display: grid; grid-template-columns: minmax(380px, 5fr) minmax(0, 7fr); background: var(--surface); }
+
+.acces-identite { position: relative; overflow: hidden; isolation: isolate; background: var(--em-950); color: #fff; padding: clamp(24px, 5vh, 44px) clamp(28px, 4vw, 56px); display: flex; flex-direction: column; justify-content: space-between; gap: 24px; }
+.acces-filigrane { position: absolute; z-index: -1; right: -22%; bottom: -30%; width: 88%; max-width: 620px; height: auto; color: #fff; opacity: .035; pointer-events: none; }
+.acces-identite .brand { color: #fff; }
+.acces-identite .brand-mark { background: #fff; }
+.acces-identite .brand small { color: #A9C6BA; }
+.acces-presentation h2 { font-size: clamp(28px, 2.7vw, 36px); font-weight: 600; letter-spacing: -0.02em; }
+.acces-presentation dl { margin: clamp(14px, 3vh, 24px) 0 0; max-width: 420px; }
+.acces-presentation dl > div { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 12px; padding: clamp(8px, 1.5vh, 12px) 0; border-top: 1px solid rgba(255, 255, 255, .14); font-size: 14px; }
+.acces-presentation dl > div:last-child { border-bottom: 1px solid rgba(255, 255, 255, .14); }
+.acces-presentation dt { font-weight: 600; }
+.acces-presentation dd { margin: 0; color: #B9D2C7; }
+.acces-mention { max-width: 420px; font-size: 13px; line-height: 1.5; color: #A9C6BA; }
+
+.acces-contenu { position: relative; display: flex; flex-direction: column; padding: clamp(16px, 3vh, 24px) clamp(20px, 3vw, 32px); }
+.acces-lien { align-self: flex-end; font-size: 14px; font-weight: 500; color: var(--ink-2); }
+.acces-centre { flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px 0; }
+.acces-form { width: min(384px, 100%); display: flex; flex-direction: column; gap: clamp(14px, 2.6vh, 20px); }
+.acces-form h1 { font-size: 30px; letter-spacing: -0.02em; }
+.acces-form h1 + p { margin-top: 6px; font-size: 15px; color: var(--ink-3); }
+.acces-form .field { gap: 6px; }
+.acces-form .input { width: 100%; min-height: 46px; }
+.acces-form .btn { width: 100%; min-height: 46px; }
+.acces-mdp { position: relative; }
+.acces-mdp .input { padding-right: 84px; }
+.acces-mdp button { position: absolute; top: 5px; right: 5px; bottom: 5px; padding: 0 10px; border: 0; border-radius: 4px; background: none; color: var(--em-700); font-size: 13.5px; font-weight: 600; cursor: pointer; }
+.acces-mdp button:hover { background: var(--em-50); color: var(--em-900); }
+.acces-note { font-size: 13px; line-height: 1.5; color: var(--ink-3); }
+.acces-pied { text-align: center; font-size: 12.5px; color: var(--ink-3); }
+
+@media (max-width: 900px) {
+  .acces { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
+  .acces-identite { padding: 20px; gap: 18px; }
+  .acces-presentation h2 { font-size: 24px; }
+  .acces-presentation dl, .acces-mention { display: none; }
+  .acces-filigrane { width: 300px; right: -70px; bottom: -130px; }
+  .acces-contenu { padding: 14px 20px 18px; }
+  .acces-centre { align-items: flex-start; padding: 8px 0 24px; }
+  .acces-form { width: min(440px, 100%); }
 }
 
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 60; background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 12px; font-size: 14.5px; box-shadow: var(--sh-3); animation: fondu .2s; max-width: calc(100% - 32px); }
