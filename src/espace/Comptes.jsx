@@ -186,6 +186,7 @@ function ModalCompte({ onFermer, onFait }) {
         </select>
         <span className="hint">{DROITS[f.role]}</span>
       </label>
+      <p className="hint">Le mot de passe provisoire sera créé automatiquement et affiché à l’étape suivante.</p>
       {erreur && <div className="alert alert-danger" role="alert"><IcoAlerte />{erreur}</div>}
     </Modal>
   );
