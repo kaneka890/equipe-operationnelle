@@ -318,24 +318,75 @@ function ModalPhotos({ mission, peutAgir, onFermer }) {
     charger();
   }
 
-  async function maj(p, champs) {
+  // Légendes et publication : modifiées à l'écran, enregistrées par le bouton Enregistrer.
+  const [modifs, setModifs] = useState({}); // { id: { legende?, publique? } }
+  const [enregistrement, setEnregistrement] = useState(false);
+  const [message, setMessage] = useState('');
+  const val = (p, k) => (modifs[p.id] && k in modifs[p.id] ? modifs[p.id][k] : p[k]);
+  const nbModifs = Object.keys(modifs).length;
+
+  function modifier(p, k, v) {
+    setMessage('');
+    setModifs((m) => {
+      const actuel = { ...(m[p.id] || {}), [k]: v };
+      // Revenu à la valeur enregistrée : plus rien à enregistrer pour ce champ.
+      if ((p[k] ?? (k === 'legende' ? '' : false)) === v) delete actuel[k];
+      const suite = { ...m };
+      if (Object.keys(actuel).length) suite[p.id] = actuel; else delete suite[p.id];
+      return suite;
+    });
+  }
+
+  async function enregistrer() {
     setErreur('');
-    setPhotos((l) => l.map((x) => (x.id === p.id ? { ...x, ...champs } : x)));
-    const { error } = await supabase.from('photos_campagne').update(champs).eq('id', p.id);
-    if (error) { setErreur(messageErreur(error)); charger(); }
+    setEnregistrement(true);
+    const echecs = [];
+    for (const [id, champs] of Object.entries(modifs)) {
+      const c = { ...champs };
+      if ('legende' in c) c.legende = String(c.legende || '').trim() || null;
+      const { error } = await supabase.from('photos_campagne').update(c).eq('id', id);
+      if (error) echecs.push(messageErreur(error));
+    }
+    setEnregistrement(false);
+    if (echecs.length) { setErreur(echecs[0]); return false; }
+    setModifs({});
+    setMessage('Modifications enregistrées.');
+    await charger();
+    return true;
+  }
+
+  function fermer() {
+    if (nbModifs && !window.confirm('Des modifications ne sont pas enregistrées. Fermer sans les enregistrer ?')) return;
+    onFermer();
   }
 
   async function supprimer(p) {
     if (!window.confirm('Supprimer définitivement cette photo ?')) return;
     setErreur('');
     try { await supprimerPhotoCampagne(p); } catch (err) { setErreur(messageErreur(err)); }
+    setModifs((m) => { const s = { ...m }; delete s[p.id]; return s; });
     charger();
   }
 
-  const publiees = photos.filter((p) => p.publique).length;
+  const publiees = photos.filter((p) => val(p, 'publique')).length;
+
+  const pied = (
+    <>
+      <span className="etat-sauvegarde">
+        {enregistrement ? 'Enregistrement…'
+          : nbModifs ? `${nbModifs} photo${nbModifs > 1 ? 's' : ''} modifiée${nbModifs > 1 ? 's' : ''}, non enregistrée${nbModifs > 1 ? 's' : ''}`
+            : message || 'Aucune modification en attente.'}
+      </span>
+      <button className="btn btn-ghost" onClick={fermer}>Fermer</button>
+      {peutAgir && (
+        <button className="btn btn-primary" disabled={!nbModifs || enregistrement}
+          onClick={async () => { if (await enregistrer()) onFermer(); }}>Enregistrer</button>
+      )}
+    </>
+  );
 
   return (
-    <Modal titre="Photos de la campagne" onFermer={onFermer} pied={<button className="btn btn-primary" onClick={onFermer}>Fermer</button>}>
+    <Modal titre="Photos de la campagne" onFermer={fermer} pied={pied}>
       <dl className="tableau-dossier cadre-fin">
         <div><dt>Mission</dt><dd>{mission.titre}</dd></div>
         <div><dt>Partenaire</dt><dd>{mission.partenaires?.nom}</dd></div>
@@ -345,11 +396,11 @@ function ModalPhotos({ mission, peutAgir, onFermer }) {
 
       {peutAgir && (
         <div className="depot-photos">
-          <label className={`btn btn-primary${envoi ? ' disabled' : ''}`}>
+          <label className={`btn btn-ghost${envoi ? ' disabled' : ''}`}>
             <input type="file" accept="image/*" multiple className="sr" onChange={deposer} disabled={!!envoi} />
             {envoi ? `Envoi ${envoi.fait + 1} / ${envoi.total}…` : 'Ajouter des photos'}
           </label>
-          <p className="hint">Plusieurs photos à la fois. Elles sont réduites avant l’envoi et restent privées tant qu’elles ne sont pas publiées.</p>
+          <p className="hint">Les photos ajoutées sont enregistrées dès la fin de l’envoi, en privé. Saisissez ensuite les légendes, cochez celles à publier, puis cliquez sur <strong>Enregistrer</strong>.</p>
         </div>
       )}
       <p className="mention">
@@ -364,17 +415,17 @@ function ModalPhotos({ mission, peutAgir, onFermer }) {
       ) : (
         <ul className="planche">
           {photos.map((p, i) => (
-            <li key={p.id}>
+            <li key={p.id} className={modifs[p.id] ? 'modifiee' : ''}>
               <a href={liens[p.chemin]} target="_blank" rel="noreferrer" className="planche-img">
                 {liens[p.chemin] ? <img src={liens[p.chemin]} alt={p.legende || `Photo ${i + 1}`} loading="lazy" /> : null}
               </a>
               <div className="planche-infos">
-                <span className="planche-num tnum">Photo {i + 1}</span>
-                <input className="input" defaultValue={p.legende || ''} maxLength={200} placeholder="Légende (facultatif)"
+                <span className="planche-num tnum">Photo {i + 1}{modifs[p.id] ? ' · modifiée' : ''}</span>
+                <input className="input" value={val(p, 'legende') || ''} maxLength={200} placeholder="Légende (facultatif)"
                   disabled={!peutAgir} aria-label={`Légende de la photo ${i + 1}`}
-                  onBlur={(e) => { const v = e.target.value.trim() || null; if (v !== (p.legende || null)) maj(p, { legende: v }); }} />
+                  onChange={(e) => modifier(p, 'legende', e.target.value)} />
                 <label className="check">
-                  <input type="checkbox" checked={p.publique} disabled={!peutAgir} onChange={(e) => maj(p, { publique: e.target.checked })} />
+                  <input type="checkbox" checked={!!val(p, 'publique')} disabled={!peutAgir} onChange={(e) => modifier(p, 'publique', e.target.checked)} />
                   Publier sur le site
                 </label>
                 {peutAgir && <button className="lien-suppr" onClick={() => supprimer(p)}>Supprimer</button>}
