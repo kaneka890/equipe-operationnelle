@@ -66,7 +66,7 @@ export default function Comptes({ moi }) {
     try {
       const mdp = motDePasseProvisoire();
       await appeler('gerer-utilisateur', { action: 'motdepasse', userId: c.id, password: mdp });
-      const { error } = await supabase.from('profils').update({ mdp_provisoire: true }).eq('id', c.id);
+      const { error } = await supabase.rpc('compte_modifier', { p_compte: c.id, p_mdp_provisoire: true });
       if (error) throw error;
       setProvisoire({ nom: c.nom, mdp });
       charger();
@@ -76,7 +76,15 @@ export default function Comptes({ moi }) {
   async function basculer(c) {
     if (c.actif && !window.confirm(`Désactiver le compte de ${c.nom} ? Cette personne n’aura plus accès à l’espace recruteurs ni à Suivi terrain.`)) return;
     setErreur('');
-    const { error } = await supabase.from('profils').update({ actif: !c.actif }).eq('id', c.id);
+    const { error } = await supabase.rpc('compte_modifier', { p_compte: c.id, p_actif: !c.actif });
+    if (error) { setErreur(messageErreur(error)); return; }
+    charger();
+  }
+
+  async function changerRole(c, role) {
+    if (!window.confirm(`Donner à ${c.nom} le rôle ${ROLES[role]} ? ${DROITS[role]}`)) return;
+    setErreur('');
+    const { error } = await supabase.rpc('compte_modifier', { p_compte: c.id, p_role: role });
     if (error) { setErreur(messageErreur(error)); return; }
     charger();
   }
@@ -106,7 +114,13 @@ export default function Comptes({ moi }) {
               <tr key={c.id}>
                 <td><strong>{c.nom}</strong>{c.id === moi.id && <span style={{ color: 'var(--ink-3)' }}> (vous)</span>}</td>
                 <td className="tnum">{c.telephone || '—'}</td>
-                <td>{ROLES[c.role]}</td>
+                <td>
+                  {c.id === moi.id ? ROLES[c.role] : (
+                    <select className="select comptes-role" aria-label={`Rôle de ${c.nom}`} value={c.role} onChange={(e) => changerRole(c, e.target.value)}>
+                      {Object.entries(ROLES).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+                    </select>
+                  )}
+                </td>
                 <td>{!c.actif ? 'Désactivé' : c.mdp_provisoire ? 'Mot de passe à choisir' : 'Actif'}</td>
                 <td>
                   {c.id !== moi.id && (
@@ -155,7 +169,7 @@ function ModalCompte({ onFermer, onFait }) {
         email, password: mdp, nom, telephone: f.telephone.trim(),
         role: f.role === 'admin' ? 'direction' : f.role,
       });
-      const { error } = await supabase.from('profils').update({ role: f.role, mdp_provisoire: true }).eq('id', profil.id);
+      const { error } = await supabase.rpc('compte_modifier', { p_compte: profil.id, p_role: f.role, p_mdp_provisoire: true });
       if (error) throw error;
       onFait({ nom, email, mdp });
     } catch (e) {
